@@ -22,7 +22,7 @@ const studentOnlyRoutes = [
   "/api/v1/quiz"
 ]
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Allow public routes
