@@ -12,11 +12,11 @@ const validTransitions: Record<string, { status: string; phase: string }[]> = {
 // PATCH /api/v1/sessions/[sessionId]/status
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { sessionId } = params
+    const { sessionId } = await params
     const body = await request.json()
     const { status, phase } = body
 

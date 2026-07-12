@@ -4,11 +4,11 @@ import { prisma } from "@/lib/prisma"
 // GET /api/v1/subjects/[subjectId] — get single subject with details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { subjectId: string } }
+  { params }: { params: Promise<{ subjectId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { subjectId } = params
+    const { subjectId } = await params
 
     const subject = await prisma.subject.findUnique({
       where: { id: subjectId },

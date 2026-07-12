@@ -4,11 +4,11 @@ import { prisma } from "@/lib/prisma"
 // GET /api/v1/sessions/[sessionId]/criteria
 export async function GET(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { sessionId } = params
+    const { sessionId } = await params
 
     // Check session exists
     const session = await prisma.classSession.findUnique({

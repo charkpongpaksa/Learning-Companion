@@ -6,10 +6,10 @@ import path from "path"
 // GET /api/v1/sessions/[sessionId]/materials
 export async function GET(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { sessionId } = params
+    const { sessionId } = await params
 
     // Check session exists
     const session = await prisma.classSession.findUnique({

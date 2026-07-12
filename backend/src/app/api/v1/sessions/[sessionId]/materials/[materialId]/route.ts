@@ -6,11 +6,11 @@ import path from "path"
 // DELETE /api/v1/sessions/[sessionId]/materials/[materialId]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { sessionId: string; materialId: string } }
+  { params }: { params: Promise<{ sessionId: string; materialId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { sessionId, materialId } = params
+    const { sessionId, materialId } = await params
 
     // Check session exists and teacher owns it
     const session = await prisma.classSession.findUnique({

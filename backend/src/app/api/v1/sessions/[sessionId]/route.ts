@@ -4,12 +4,12 @@ import { prisma } from "@/lib/prisma"
 // GET /api/v1/sessions/[sessionId] — get single session with full details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const userId = request.headers.get("x-user-id")
     const userRole = request.headers.get("x-user-role")
-    const { sessionId } = params
+    const { sessionId } = await params
 
     const session = await prisma.classSession.findUnique({
       where: { id: sessionId },

@@ -4,11 +4,11 @@ import { prisma } from "@/lib/prisma"
 // PATCH /api/v1/subjects/[subjectId]/semester-criteria/[criteriaId]
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { subjectId: string; criteriaId: string } }
+  { params }: { params: Promise<{ subjectId: string; criteriaId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { subjectId, criteriaId } = params
+    const { subjectId, criteriaId } = await params
     const body = await request.json()
     const { description, goal, order } = body
 
