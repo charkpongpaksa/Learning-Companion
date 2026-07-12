@@ -77,11 +77,11 @@ export async function PATCH(
 // DELETE /api/v1/sessions/[sessionId]/criteria/[criteriaId]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { sessionId: string; criteriaId: string } }
+  { params }: { params: Promise<{ sessionId: string; criteriaId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { sessionId, criteriaId } = params
+    const { sessionId, criteriaId } = await params
 
     // Check session exists and teacher owns it
     const session = await prisma.classSession.findUnique({

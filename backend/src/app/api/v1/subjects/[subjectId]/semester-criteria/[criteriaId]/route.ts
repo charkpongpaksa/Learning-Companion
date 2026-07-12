@@ -69,11 +69,11 @@ export async function PATCH(
 // DELETE /api/v1/subjects/[subjectId]/semester-criteria/[criteriaId]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { subjectId: string; criteriaId: string } }
+  { params }: { params: Promise<{ subjectId: string; criteriaId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { subjectId, criteriaId } = params
+    const { subjectId, criteriaId } = await params
 
     // Check subject exists and teacher owns it
     const subject = await prisma.subject.findUnique({

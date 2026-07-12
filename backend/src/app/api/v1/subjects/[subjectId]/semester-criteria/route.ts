@@ -48,11 +48,11 @@ export async function GET(
 // POST /api/v1/subjects/[subjectId]/semester-criteria
 export async function POST(
   request: NextRequest,
-  { params }: { params: { subjectId: string } }
+  { params }: { params: Promise<{ subjectId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { subjectId } = params
+    const { subjectId } = await params
     const body = await request.json()
     const { description, goal, order } = body
 
