@@ -1,14 +1,12 @@
+// app/student/dashboard/page.tsx
 'use client';
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  BookOpen, 
   Layers, 
   BarChart2, 
-  Users, 
   FileText, 
-  Settings, 
   LogOut, 
   Search, 
   Plus, 
@@ -17,58 +15,25 @@ import {
   ChevronDown 
 } from 'lucide-react';
 
-const SESSIONS_DATA = [
-  {
-    id: 1,
-    week: 'Week 1',
-    title: 'Cloud fundamentals',
-    description: 'Core concepts of cloud computing',
-    status: 'Completed',
-    date: 'Mar 1',
-    info: 'Readiness 94%',
-  },
-  {
-    id: 2,
-    week: 'Week 2',
-    title: 'S3 and storage tiers',
-    description: 'Object storage fundamentals and lifecycle policies',
-    status: 'Completed',
-    date: 'Mar 8',
-    info: 'Readiness 82%',
-  },
-  {
-    id: 3,
-    week: 'Week 3',
-    title: 'EC2 and IAM',
-    description: 'Understanding EC2 instances and IAM roles for secure access',
-    status: 'Active',
-    date: 'Mar 15',
-    info: 'Before class',
-  },
-  {
-    id: 4,
-    week: 'Week 4',
-    title: 'VPC networking',
-    description: 'Subnets, route tables, and security groups',
-    status: 'Upcoming',
-    date: 'Mar 22',
-    info: 'Not started',
-  },
-];
+// 🌟 ดึงข้อมูลมาจากไฟล์ data.ts ที่เราแยกไว้
+import { SUBJECTS, SESSIONS_BY_SUBJECT } from './data';
 
 export default function StudentDashboard() {
   const router = useRouter();
+
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [selectedSubject, setSelectedSubject] = React.useState(SUBJECTS[0]);
 
   const handleLogout = () => {
     router.push('/login');
   };
 
+  const currentSessions = SESSIONS_BY_SUBJECT[selectedSubject.code as keyof typeof SESSIONS_BY_SUBJECT] || [];
+
   return (
     <div className="flex min-h-screen bg-[#fdfbf7] text-stone-900 font-sans">
       
-      {/* =========================================================
-          LEFT SIDEBAR (แถบเมนูด้านซ้าย)
-         ========================================================= */}
+      {/* LEFT SIDEBAR */}
       <aside className="w-64 bg-white border-r border-stone-200/60 flex flex-col justify-between fixed h-full z-20">
         <div>
           <div className="p-5 flex items-center gap-2">
@@ -76,16 +41,54 @@ export default function StudentDashboard() {
             <h1 className="text-md font-bold tracking-tight text-stone-950">Learning Companion</h1>
           </div>
 
-          <div className="px-3 mb-6">
-            <div className="flex items-center justify-between p-2.5 bg-white border border-stone-200/80 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors">
-              <div className="text-left">
-                <p className="text-[13px] font-bold text-stone-900 truncate max-w-[160px]">
-                  CS332 · Basic Cloud Computing
+          {/* Dropdown วิชา */}
+          <div className="px-3 mb-6 relative">
+            <div 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center justify-between p-2.5 bg-white border border-stone-200/80 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors select-none"
+            >
+              <div className="text-left min-w-0 flex-1">
+                <p className="text-[13px] font-bold text-stone-900 truncate pr-1">
+                  {selectedSubject.displayShort}
                 </p>
-                <p className="text-[10px] text-stone-400 font-medium">2 subjects</p>
+                <p className="text-[10px] text-stone-400 font-medium">{SUBJECTS.length} subjects</p>
               </div>
-              <ChevronDown size={16} className="text-stone-400" />
+              <ChevronDown 
+                size={16} 
+                className={`text-stone-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+              />
             </div>
+
+            {isDropdownOpen && (
+              <div className="absolute left-3 right-3 top-full mt-1.5 bg-white border border-stone-200 shadow-xl rounded-xl z-30 overflow-hidden">
+                {SUBJECTS.map((subject) => {
+                  const isSelected = subject.id === selectedSubject.id;
+                  return (
+                    <div
+                      key={subject.id}
+                      onClick={() => {
+                        setSelectedSubject(subject);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`p-3 text-left cursor-pointer transition-colors ${
+                        isSelected 
+                          ? 'bg-[#fff3ed] text-[#d84315]' 
+                          : 'bg-white text-stone-900 hover:bg-stone-50'
+                      }`}
+                    >
+                      <p className="text-xs font-bold truncate">
+                        {subject.displayShort}
+                      </p>
+                      <p className={`text-[10px] font-medium mt-0.5 ${
+                        isSelected ? 'text-[#d84315]/70' : 'text-stone-400'
+                      }`}>
+                        {subject.weeks}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <nav className="px-3 space-y-5">
@@ -131,17 +134,13 @@ export default function StudentDashboard() {
         </div>
       </aside>
 
-      {/* =========================================================
-          RIGHT MAIN CONTENT (พื้นที่แสดงเนื้อหาหลักทางขวา)
-         ========================================================= */}
-      {/* เพิ่ม relative และ overflow-hidden เพื่อรองรับแสงฟุ้ง */}
+      {/* RIGHT MAIN CONTENT */}
       <main 
         className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden"
         style={{
             background: 'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #fdfbf7 80%)'
         }}
-        >
-
+      >
         <div className="relative z-10 max-w-6xl mx-auto space-y-6">
           
           {/* Header Area */}
@@ -149,7 +148,7 @@ export default function StudentDashboard() {
             <div>
               <h2 className="text-2xl font-bold text-stone-900 tracking-tight">Your sessions</h2>
               <p className="text-xs text-stone-400 mt-1">
-                CS332 · Basic Cloud Computing — prepare before class, catch up if you missed something.
+                {selectedSubject.code} - {selectedSubject.name} — prepare before class, catch up if you missed something.
               </p>
             </div>
 
@@ -171,7 +170,7 @@ export default function StudentDashboard() {
 
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SESSIONS_DATA.map((session) => (
+            {currentSessions.map((session) => (
               <div 
                 key={session.id}
                 className="bg-white border border-stone-200/60 rounded-xl p-5 flex flex-col justify-between min-h-[170px] shadow-sm hover:shadow-md/5 transition-all"
@@ -183,10 +182,10 @@ export default function StudentDashboard() {
                     </span>
                     
                     {session.status === 'Completed' && (
-                        <span className="px-2.5 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-semibold border border-green-100">
-                          Completed
-                        </span>
-                )}
+                      <span className="px-2.5 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-semibold border border-green-100">
+                        Completed
+                      </span>
+                    )}
                     {session.status === 'Active' && (
                       <span className="px-2.5 py-0.5 bg-[#fff3ed] text-[#d84315] rounded-full text-[10px] font-bold border border-orange-100">
                         Active
