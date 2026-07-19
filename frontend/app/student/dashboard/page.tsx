@@ -164,9 +164,9 @@ export default function StudentDashboard() {
       <main 
         className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden"
         style={{
-            background: 'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #fdfbf7 80%)'
+            background: 'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)'
         }}
-      >
+    >
         <div className="relative z-10 max-w-6xl mx-auto space-y-6">
           
           {/* Header Area */}
