@@ -207,7 +207,14 @@ export default function StudentDashboard() {
               {filteredSessions.map((session) => (
                 <div 
                   key={session.id}
-                  className="bg-white border border-stone-200/60 rounded-xl p-5 flex flex-col justify-between min-h-[170px] shadow-sm hover:shadow-md/5 transition-all"
+                  onClick={() => {
+                    if (session.status !== 'Upcoming') {
+                      router.push(`/student/session/${session.id}`);
+                    } else {
+                      alert('เซสชันนี้ยังไม่เปิดให้เข้าเรียนครับ');
+                    }
+                  }}
+                  className="bg-white border border-stone-200/60 rounded-xl p-5 flex flex-col justify-between min-h-[170px] shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-orange-300"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
