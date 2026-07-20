@@ -1,6 +1,7 @@
 'use client';
 
 import React from "react";
+import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import {
   CalendarDays,
@@ -210,34 +211,34 @@ export default function TeacherDashboard() {
                 Teacher
               </p>
               <div className="space-y-0.5">
-                <a
-                  href="#"
+                <Link
+                  href="/teacher/sessions"
                   className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-bold text-[#d84315] bg-[#fff3ed] rounded-lg"
                 >
                   <CalendarDays size={15} />
                   Sessions
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  href="/teacher/students"
                   className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors"
                 >
                   <Users size={15} className="text-stone-400" />
                   Students
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  href="/teacher/materials"
                   className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors"
                 >
                   <FileText size={15} className="text-stone-400" />
                   Materials & prompts
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  href="/teacher/subjects"
                   className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors"
                 >
                   <Settings size={15} className="text-stone-400" />
                   Subject settings
-                </a>
+                </Link>
               </div>
             </div>
           </nav>

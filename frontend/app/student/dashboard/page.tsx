@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
   Layers,
@@ -117,18 +118,18 @@ export default function StudentDashboard() {
                 Student
               </p>
               <div className="space-y-0.5">
-                <a href="#" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-bold text-[#d84315] bg-[#fff3ed] rounded-lg">
+                <Link href="/student/sessions" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-bold text-[#d84315] bg-[#fff3ed] rounded-lg">
                   <Layers size={15} />
                   Sessions
-                </a>
-                <a href="#" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
+                </Link>
+                <Link href="/student/materials" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
                   <FileText size={15} className="text-stone-400" />
                   Materials
-                </a>
-                <a href="#" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
+                </Link>
+                <Link href="/student/progress" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
                   <TrendingUp size={15} className="text-stone-400" />
                   My progress
-                </a>
+                </Link>
               </div>
             </div>
           </nav>
