@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { 
   Layers, 
   FileText, 
-  BarChart2, 
+  TrendingUp, 
   Users, 
   Settings, 
   LogOut, 
@@ -131,7 +131,7 @@ export default function SessionPage() {
                   Materials
                 </a>
                 <a href="#" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
-                  <BarChart2 size={15} className="text-stone-400" />
+                  <TrendingUp size={15} className="text-stone-400" />
                   My progress
                 </a>
               </div>
