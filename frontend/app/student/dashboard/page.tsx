@@ -300,7 +300,7 @@ export default function StudentDashboard() {
                 value={sessionCode}
                 onChange={(e) => setSessionCode(e.target.value)}
                 required
-                className="w-full bg-stone-100/90 border border-stone-200/60 rounded-[14px] px-4 py-3.5 text-sm placeholder:text-stone-400 text-stone-900 outline-none focus:border-stone-400 transition-all font-medium"
+                className="w-full bg-stone-100/90 border border-stone-300 rounded-[14px] px-4 py-3.5 text-sm placeholder:text-stone-400 text-stone-900 outline-none focus:border-stone-400 transition-all font-medium"
               />
 
               {/* ปุ่มควบคุมล่างขวา */}
