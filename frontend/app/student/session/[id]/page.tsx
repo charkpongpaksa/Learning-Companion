@@ -174,7 +174,7 @@ export default function SessionPage() {
           <div>
             <button
             suppressHydrationWarning
-              onClick={() => router.back()}
+              onClick={() => router.push("/student/dashboard")}
               className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-stone-800 mb-3 transition-colors cursor-pointer"
             >
               <ChevronLeft size={16} /> Your sessions
