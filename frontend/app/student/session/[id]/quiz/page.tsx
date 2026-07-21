@@ -247,13 +247,13 @@ export default function ReadinessQuizPage() {
         <div className="relative z-10 max-w-6xl mx-auto space-y-5">
           
           {/* Back Breadcrumb Link */}
-          <button 
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-1 text-xs font-medium text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
-            >
-            <ChevronLeft size={14} />
-            Week 3 — EC2 and IAM
-          </button>
+          <Link 
+          href={`/student/session/${sessionId}`} // 3. นำ sessionId มาใส่ใน URL แบบ Dynamic
+          className="inline-flex items-center gap-1 text-xs font-medium text-stone-400 hover:text-stone-700 transition-colors"
+          >
+          <ChevronLeft size={14} />
+          Week 3 — EC2 and IAM
+          </Link>
 
           {/* Title Header */}
           <div>
