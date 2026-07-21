@@ -180,10 +180,10 @@ export default function StudentMaterials() {
                   <FileText size={15} />
                   Materials
                 </Link>
-                <a href="#" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
+                <Link href="/student/progress" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
                   <TrendingUp size={15} className="text-stone-400" />
                   My progress
-                </a>
+                </Link>
               </div>
             </div>
           </nav>
