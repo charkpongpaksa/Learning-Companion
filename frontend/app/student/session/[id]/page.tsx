@@ -6,22 +6,28 @@ import {
   Layers, 
   FileText, 
   TrendingUp, 
-  Users, 
   Settings, 
   LogOut, 
   ChevronLeft, 
   ChevronDown, 
   Send,
   Paperclip,
-  X
+  X,
+  Plus
 } from 'lucide-react';
 import { SESSIONS_BY_SUBJECT } from '../../dashboard/data'; // ปรับ path ให้ตรงกับที่เก็บ data.ts
+
+// ข้อมูลวิชาสำหรับ Dropdown
+const SUBJECTS = [
+  { id: 'cs332', displayShort: 'CS332 · Basic Cloud Computing', weeks: '10 weeks' },
+  { id: 'cs211', displayShort: 'CS211 · Advanced Data Structures', weeks: '8 weeks' },
+];
 
 interface Message {
   id: number;
   sender: 'user' | 'bot';
   text: string;
-  image?: string; // รองรับรูปภาพในข้อความ
+  image?: string;
 }
 
 export default function SessionPage() {
@@ -29,6 +35,12 @@ export default function SessionPage() {
   const router = useRouter();
   const sessionId = params.id as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // State สำหรับ Subject Dropdown & Add Subject Modal
+  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
+  const [subjectCode, setSubjectCode] = useState('');
 
   // ค้นหาข้อมูล Session จาก data.ts
   const allSessions = Object.values(SESSIONS_BY_SUBJECT).flat();
@@ -45,6 +57,14 @@ export default function SessionPage() {
 
   const [inputMessage, setInputMessage] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  // ฟังก์ชันส่งรหัสวิชา (Add Subject)
+  const handleAddSubjectSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(`กำลังเพิ่มวิชาด้วยโค้ด: ${subjectCode}`);
+    setIsAddSubjectModalOpen(false);
+    setSubjectCode('');
+  };
 
   // ฟังก์ชันเลือกรูปภาพ
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,17 +118,69 @@ export default function SessionPage() {
             <h1 className="text-md font-bold tracking-tight text-stone-950">Learning Companion</h1>
           </div>
 
-          {/* Subject Selector */}
-          <div className="px-3 mb-6">
-            <div className="flex items-center justify-between p-2.5 bg-white border border-stone-200/80 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors select-none">
+          {/* Subject Selector Dropdown */}
+          <div className="px-3 mb-6 relative">
+            <div 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center justify-between p-2.5 bg-white border border-stone-200/80 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors select-none"
+            >
               <div className="text-left min-w-0 flex-1">
                 <p className="text-[13px] font-bold text-stone-900 truncate pr-1">
-                  CS332 · Basic Cloud Computing
+                  {selectedSubject.displayShort}
                 </p>
-                <p className="text-[10px] text-stone-400 font-medium">2 subjects</p>
+                <p className="text-[10px] text-stone-400 font-medium">{SUBJECTS.length} subjects</p>
               </div>
-              <ChevronDown size={16} className="text-stone-400 flex-shrink-0" />
+              <ChevronDown 
+                size={16} 
+                className={`text-stone-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+              />
             </div>
+
+            {/* Menu List */}
+            {isDropdownOpen && (
+              <div className="absolute left-3 right-3 top-full mt-1.5 bg-white border border-stone-200 shadow-xl rounded-xl z-30 overflow-hidden divide-y divide-stone-100">
+                <div>
+                  {SUBJECTS.map((subject) => {
+                    const isSelected = subject.id === selectedSubject.id;
+                    return (
+                      <div
+                        key={subject.id}
+                        onClick={() => {
+                          setSelectedSubject(subject);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`p-3 text-left cursor-pointer transition-colors ${
+                          isSelected 
+                            ? 'bg-[#fff3ed] text-[#d84315]' 
+                            : 'bg-white text-stone-900 hover:bg-stone-50'
+                        }`}
+                      >
+                        <p className="text-xs font-bold truncate">
+                          {subject.displayShort}
+                        </p>
+                        <p className={`text-[10px] font-medium mt-0.5 ${
+                          isSelected ? 'text-[#d84315]/70' : 'text-stone-400'
+                        }`}>
+                          {subject.weeks}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* ปุ่ม Add subject ใน Dropdown */}
+                <div 
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    setIsAddSubjectModalOpen(true);
+                  }}
+                  className="p-3 text-left cursor-pointer hover:bg-stone-50 transition-colors flex items-center gap-2 text-[#d84315] font-bold text-xs"
+                >
+                  <Plus size={14} />
+                  <span>Add subject</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Nav Items */}
@@ -119,7 +191,7 @@ export default function SessionPage() {
               </p>
               <div className="space-y-0.5">
                 <button
-                suppressHydrationWarning
+                  suppressHydrationWarning
                   onClick={() => router.push('/student/dashboard')}
                   className="w-full flex items-center gap-2.5 px-3 py-2 text-[14px] font-bold text-[#d84315] bg-[#fff3ed] rounded-lg text-left cursor-pointer"
                 >
@@ -151,7 +223,7 @@ export default function SessionPage() {
             </div>
           </div>
           <button
-          suppressHydrationWarning
+            suppressHydrationWarning
             onClick={() => router.push('/login')}
             className="p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-50 rounded-md transition-colors"
             title="Log out"
@@ -173,8 +245,8 @@ export default function SessionPage() {
           {/* Header & Back Button */}
           <div>
             <button
-            suppressHydrationWarning
-              onClick={() => router.push("/student/dashboard")}
+              suppressHydrationWarning
+              onClick={() => router.back()}
               className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-stone-800 mb-3 transition-colors cursor-pointer"
             >
               <ChevronLeft size={16} /> Your sessions
@@ -192,7 +264,7 @@ export default function SessionPage() {
 
               {/* ปุ่มสีส้ม Take readiness quiz */}
               <button
-              suppressHydrationWarning
+                suppressHydrationWarning
                 onClick={() => alert('Starting readiness quiz...')}
                 className="self-start md:self-auto px-6 py-4 bg-[#e65100] hover:bg-[#d84315] text-white text-[13px] font-bold rounded-full shadow-sm hover:shadow transition-all active:scale-95 cursor-pointer flex-shrink-0"
               >
@@ -252,7 +324,7 @@ export default function SessionPage() {
                 <div className="relative inline-block w-20 h-20 rounded-xl overflow-hidden border border-stone-300 shadow-sm ml-2">
                   <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
                   <button
-                  suppressHydrationWarning
+                    suppressHydrationWarning
                     type="button"
                     onClick={() => setSelectedImage(null)}
                     className="absolute top-1 right-1 p-0.5 bg-stone-900/70 hover:bg-stone-900 text-white rounded-full transition-colors cursor-pointer"
@@ -275,7 +347,7 @@ export default function SessionPage() {
 
                 {/* 📎 ปุ่มไอคอนคลิปแนบรูป */}
                 <button
-                suppressHydrationWarning
+                  suppressHydrationWarning
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute left-3.5 text-stone-400 hover:text-[#d84315] transition-colors p-1 rounded-full cursor-pointer"
@@ -286,7 +358,7 @@ export default function SessionPage() {
 
                 {/* ช่องพิมพ์ข้อความ */}
                 <input
-                suppressHydrationWarning
+                  suppressHydrationWarning
                   type="text"
                   placeholder="Ask about EC2, IAM, or this week's material"
                   value={inputMessage}
@@ -296,7 +368,7 @@ export default function SessionPage() {
 
                 {/* ปุ่มกดส่ง */}
                 <button
-                suppressHydrationWarning
+                  suppressHydrationWarning
                   type="submit"
                   className="absolute right-2 w-9 h-9 bg-[#f48c5a] hover:bg-[#e65100] text-white rounded-full flex items-center justify-center transition-all cursor-pointer shadow-sm"
                 >
@@ -309,6 +381,56 @@ export default function SessionPage() {
 
         </div>
       </main>
+
+      {/* ADD A SUBJECT MODAL POPUP */}
+      {isAddSubjectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4 transition-all">
+          <div className="bg-white rounded-[26px] max-w-[460px] w-full p-7 relative shadow-2xl border border-stone-100 text-left animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-[20px] font-bold text-stone-950 tracking-tight">
+                Add a subject
+              </h3>
+              <button 
+                onClick={() => { setIsAddSubjectModalOpen(false); setSubjectCode(''); }}
+                className="text-stone-400 hover:text-stone-600 transition-colors p-1 rounded-md cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-[13px] text-stone-500 font-normal leading-relaxed mb-5">
+              Enter the code your teacher gave you to add their subject.
+            </p>
+
+            <form onSubmit={handleAddSubjectSubmit} className="space-y-6">
+              <input
+                type="text"
+                placeholder="e.g. CS332"
+                value={subjectCode}
+                onChange={(e) => setSubjectCode(e.target.value)}
+                required
+                className="w-full bg-stone-100/90 border border-stone-200/80 rounded-[14px] px-4 py-3.5 text-sm placeholder:text-stone-400 text-stone-900 outline-none focus:border-stone-400 transition-all font-medium"
+              />
+
+              <div className="flex justify-end gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setIsAddSubjectModalOpen(false); setSubjectCode(''); }}
+                  className="px-5 py-2 border border-stone-950 text-stone-950 font-bold text-[13px] rounded-full hover:bg-stone-50 transition-all active:scale-[0.97] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#f89b78] hover:bg-[#e65100] text-white font-bold text-[13px] rounded-full shadow-sm transition-all active:scale-[0.97] cursor-pointer"
+                >
+                  Add subject
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );
