@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -21,22 +21,23 @@ import { SUBJECTS, SESSIONS_BY_SUBJECT } from './data';
 export default function StudentDashboard() {
   const router = useRouter();
 
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const [selectedSubject, setSelectedSubject] = React.useState(SUBJECTS[0]);
-  const [searchQuery, setSearchQuery] = React.useState('');
-  
-  const [isJoinModalOpen, setIsJoinModalOpen] = React.useState(false);
-  const [sessionCode, setSessionCode] = React.useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // State สำหรับ Modal "Add a subject" (ตามรูปที่ 2)
+  const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
+  const [subjectCode, setSubjectCode] = useState('');
 
   const handleLogout = () => {
     router.push('/login');
   };
 
-  const handleJoinSubmit = (e: React.FormEvent) => {
+  const handleAddSubjectSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`กำลังเข้าร่วม Session ด้วยโค้ด: ${sessionCode}`);
-    setIsJoinModalOpen(false);
-    setSessionCode('');
+    alert(`กำลังเพิ่มวิชาด้วยโค้ด: ${subjectCode}`);
+    setIsAddSubjectModalOpen(false);
+    setSubjectCode('');
   };
 
   const currentSessions = SESSIONS_BY_SUBJECT[selectedSubject.code as keyof typeof SESSIONS_BY_SUBJECT] || [];
@@ -80,34 +81,48 @@ export default function StudentDashboard() {
             </div>
 
             {isDropdownOpen && (
-              <div className="absolute left-3 right-3 top-full mt-1.5 bg-white border border-stone-200 shadow-xl rounded-xl z-30 overflow-hidden">
-                {SUBJECTS.map((subject) => {
-                  const isSelected = subject.id === selectedSubject.id;
-                  return (
-                    <div
-                      key={subject.id}
-                      onClick={() => {
-                        setSelectedSubject(subject);
-                        setIsDropdownOpen(false);
-                        setSearchQuery(''); 
-                      }}
-                      className={`p-3 text-left cursor-pointer transition-colors ${
-                        isSelected 
-                          ? 'bg-[#fff3ed] text-[#d84315]' 
-                          : 'bg-white text-stone-900 hover:bg-stone-50'
-                      }`}
-                    >
-                      <p className="text-xs font-bold truncate">
-                        {subject.displayShort}
-                      </p>
-                      <p className={`text-[10px] font-medium mt-0.5 ${
-                        isSelected ? 'text-[#d84315]/70' : 'text-stone-400'
-                      }`}>
-                        {subject.weeks}
-                      </p>
-                    </div>
-                  );
-                })}
+              <div className="absolute left-3 right-3 top-full mt-1.5 bg-white border border-stone-200 shadow-xl rounded-xl z-30 overflow-hidden divide-y divide-stone-100">
+                <div>
+                  {SUBJECTS.map((subject) => {
+                    const isSelected = subject.id === selectedSubject.id;
+                    return (
+                      <div
+                        key={subject.id}
+                        onClick={() => {
+                          setSelectedSubject(subject);
+                          setIsDropdownOpen(false);
+                          setSearchQuery(''); 
+                        }}
+                        className={`p-3 text-left cursor-pointer transition-colors ${
+                          isSelected 
+                            ? 'bg-[#fff3ed] text-[#d84315]' 
+                            : 'bg-white text-stone-900 hover:bg-stone-50'
+                        }`}
+                      >
+                        <p className="text-xs font-bold truncate">
+                          {subject.displayShort}
+                        </p>
+                        <p className={`text-[10px] font-medium mt-0.5 ${
+                          isSelected ? 'text-[#d84315]/70' : 'text-stone-400'
+                        }`}>
+                          {subject.weeks}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* ปุ่ม Add Subject ด้านล่างสุดของ Dropdown (รูปที่ 1) */}
+                <div 
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    setIsAddSubjectModalOpen(true);
+                  }}
+                  className="p-3 text-left cursor-pointer hover:bg-stone-50 transition-colors flex items-center gap-2 text-[#d84315] font-bold text-xs"
+                >
+                  <Plus size={14} />
+                  <span>Add subject</span>
+                </div>
               </div>
             )}
           </div>
@@ -146,6 +161,7 @@ export default function StudentDashboard() {
             </div>
           </div>
           <button 
+            
             onClick={handleLogout}
             className="p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-50 rounded-md transition-colors"
             title="Log out"
@@ -184,14 +200,6 @@ export default function StudentDashboard() {
                   className="w-full pl-9 pr-4 h-9 bg-white border border-stone-200/80 rounded-full text-xs placeholder:text-stone-300 outline-none focus:border-orange-500/50"
                 />
               </div>
-              
-              <button 
-                onClick={() => setIsJoinModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 h-9 bg-[#e65100] hover:bg-[#d84315] text-white text-xs font-bold rounded-full shadow-sm transition-all active:scale-[0.98] cursor-pointer"
-              >
-                <Plus size={14} />
-                Join with code
-              </button>
             </div>
           </div>
 
@@ -273,49 +281,49 @@ export default function StudentDashboard() {
         </div>
       </main>
 
-      {/* JOIN WITH CODE MODAL POPUP */}
-      {isJoinModalOpen && (
+      {/* ADD A SUBJECT MODAL POPUP (รูปที่ 2) */}
+      {isAddSubjectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4 transition-all">
           <div className="bg-white rounded-[26px] max-w-[460px] w-full p-7 relative shadow-2xl border border-stone-100 text-left animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-[21px] font-bold text-stone-950 tracking-tight">
-                Join a session with a code
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-[20px] font-bold text-stone-950 tracking-tight">
+                Add a subject
               </h3>
               <button 
-                onClick={() => { setIsJoinModalOpen(false); setSessionCode(''); }}
+                onClick={() => { setIsAddSubjectModalOpen(false); setSubjectCode(''); }}
                 className="text-stone-400 hover:text-stone-600 transition-colors p-1 rounded-md cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <p className="text-[13.5px] text-stone-500 font-normal leading-relaxed mb-5">
-              Enter the code your teacher gave you to join a session.
+            <p className="text-[13px] text-stone-500 font-normal leading-relaxed mb-5">
+              Enter the code your teacher gave you to add their subject.
             </p>
 
-            <form onSubmit={handleJoinSubmit} className="space-y-6">
+            <form onSubmit={handleAddSubjectSubmit} className="space-y-6">
               <input
                 type="text"
-                placeholder="e.g. CS332-8XQP"
-                value={sessionCode}
-                onChange={(e) => setSessionCode(e.target.value)}
+                placeholder="e.g. CS332"
+                value={subjectCode}
+                onChange={(e) => setSubjectCode(e.target.value)}
                 required
-                className="w-full bg-stone-100/90 border border-stone-300 rounded-[14px] px-4 py-3.5 text-sm placeholder:text-stone-400 text-stone-900 outline-none focus:border-stone-400 transition-all font-medium"
+                className="w-full bg-stone-100/90 border border-stone-200/80 rounded-[14px] px-4 py-3.5 text-sm placeholder:text-stone-400 text-stone-900 outline-none focus:border-stone-400 transition-all font-medium"
               />
 
               <div className="flex justify-end gap-2.5 pt-1">
                 <button
                   type="button"
-                  onClick={() => { setIsJoinModalOpen(false); setSessionCode(''); }}
-                  className="px-[22px] py-2 border-[1.5px] border-stone-950 text-stone-950 font-bold text-[13px] rounded-full hover:bg-stone-50 transition-all active:scale-[0.97] cursor-pointer"
+                  onClick={() => { setIsAddSubjectModalOpen(false); setSubjectCode(''); }}
+                  className="px-5 py-2 border border-stone-950 text-stone-950 font-bold text-[13px] rounded-full hover:bg-stone-50 transition-all active:scale-[0.97] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-[26px] py-2 bg-[#e65100] hover:bg-[#d84315] text-white font-bold text-[13px] rounded-full shadow-lg shadow-orange-700/15 transition-all active:scale-[0.97] cursor-pointer"
+                  className="px-5 py-2 bg-[#f89b78] hover:bg-[#e65100] text-white font-bold text-[13px] rounded-full shadow-sm transition-all active:scale-[0.97] cursor-pointer"
                 >
-                  Join
+                  Add subject
                 </button>
               </div>
             </form>
