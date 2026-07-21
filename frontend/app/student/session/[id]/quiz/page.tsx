@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { 
   Layers,
   TrendingUp,
@@ -11,9 +10,7 @@ import {
   LogOut, 
   ChevronDown,
   ChevronLeft,
-  Users,
-  Sliders,
-  FolderOpen
+  RotateCcw
 } from 'lucide-react';
 
 import { SUBJECTS } from '../../../dashboard/data';
@@ -48,7 +45,6 @@ const QUIZ_QUESTIONS: Question[] = [
     type: 'boolean',
     topic: 'AWS SECURITY',
     question: 'By default, all inbound traffic to a newly created Security Group in AWS is allowed.',
-    // True/False ใช้ตัวเลือกอัตโนมัติเป็น True / False
   },
   {
     id: 3,
@@ -74,13 +70,15 @@ export default function ReadinessQuizPage() {
   const router = useRouter();
   const params = useParams();
   const sessionId = params.id;
+
   // State สำหรับ Sidebar
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<any>(SUBJECTS[0]);
 
-  // State สำหรับ Quiz
+  // State สำหรับ Quiz Navigation & Status
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
-  
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   // เก็บคำตอบรองรับทั้ง Index (ข้อเลือก/ถูกผิด) และ String (ข้อเขียน)
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number | string }>({});
 
@@ -114,8 +112,7 @@ export default function ReadinessQuizPage() {
     if (currentQuestionIdx < totalQuestions - 1) {
       setCurrentQuestionIdx((prev) => prev + 1);
     } else {
-      alert('Quiz Submitted! 🎉');
-      router.push('/student/dashboard');
+      setIsSubmitted(true);
     }
   };
 
@@ -125,6 +122,38 @@ export default function ReadinessQuizPage() {
     } else {
       router.back();
     }
+  };
+
+  const handleRetakeQuiz = () => {
+    setIsSubmitted(false);
+    setCurrentQuestionIdx(0);
+    setSelectedAnswers({});
+  };
+
+  // ฟังก์ชันแปลงรูปแบบประเภทโจทย์แสดงผลใน Quiz Results
+  const renderTypeBadge = (type: QuestionType) => {
+    switch (type) {
+      case 'mcq':
+        return <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-purple-100 text-purple-700">Multiple Choice</span>;
+      case 'boolean':
+        return <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-blue-100 text-blue-700">True / False</span>;
+      case 'text':
+        return <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-amber-100 text-amber-700">Short Answer</span>;
+    }
+  };
+
+  // ดึงคำตอบของข้อนั้นๆ มาแปลงเป็น ข้อความอ่านง่าย
+  const getFormattedAnswer = (q: Question, idx: number) => {
+    const rawAns = selectedAnswers[idx];
+    if (rawAns === undefined || String(rawAns).trim() === '') return '- Not Answered -';
+
+    if (q.type === 'mcq' && q.options) {
+      return q.options[Number(rawAns)] || String(rawAns);
+    }
+    if (q.type === 'boolean') {
+      return rawAns === 'true' ? 'True' : 'False';
+    }
+    return String(rawAns);
   };
 
   // ตรวจสอบว่าข้อปัจจุบันตอบหรือยัง
@@ -195,7 +224,7 @@ export default function ReadinessQuizPage() {
             )}
           </div>
 
-          <nav className="px-3 space-y-5">
+          <nav className="px-3 space-y-5 text-left">
             <div>
               <p className="px-2 text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1.5">
                 Student
@@ -239,183 +268,290 @@ export default function ReadinessQuizPage() {
       </aside>
 
       {/* ================= 2. MAIN CONTENT ================= */}
-      <main className="flex-1 pl-64 px-8 pt-12 pb-8 relative overflow-hidden"
-      style={{
+      <main className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden text-left"
+        style={{
           background: 'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)'
         }}
-        >
-        <div className="relative z-10 max-w-6xl mx-auto space-y-5">
+      >
+        <div className="relative z-10 max-w-6xl mx-auto space-y-3">
           
           {/* Back Breadcrumb Link */}
-          <Link 
-          href={`/student/session/${sessionId}`} // 3. นำ sessionId มาใส่ใน URL แบบ Dynamic
-          className="inline-flex items-center gap-1 text-xs font-medium text-stone-400 hover:text-stone-700 transition-colors"
-          >
-          <ChevronLeft size={14} />
-          Week 3 — EC2 and IAM
-          </Link>
-
-          {/* Title Header */}
-          <div>
-            <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Readiness quiz</h1>
-            <p className="text-xs text-stone-400 mt-1">
-              {totalQuestions} short questions based on tonight's chat.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <Link 
+              href={`/student/session/${sessionId}`}
+              className="inline-flex items-center gap-1 text-xs font-medium text-stone-400 hover:text-stone-700 transition-colors"
+            >
+              <ChevronLeft size={14} />
+              Week 3 — EC2 and IAM
+            </Link>
           </div>
 
-          {/* QUIZ CARD CONTAINER */}
-          <div className="bg-white border border-stone-200/70 rounded-3xl p-8 shadow-sm space-y-8">
-            
-            {/* 1. Progress Steps Bar */}
-            <div className="space-y-2">
-              <div 
-                className="grid gap-2"
-                style={{ gridTemplateColumns: `repeat(${totalQuestions}, minmax(0, 1fr))` }}
-              >
-                {Array.from({ length: totalQuestions }).map((_, idx) => {
-                  const isCurrent = idx === currentQuestionIdx;
-                  const isAnswered =
-                    selectedAnswers[idx] !== undefined &&
-                    String(selectedAnswers[idx]).trim() !== '';
+          {!isSubmitted ? (
 
-                  return (
-                    <div
-                      key={idx}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        isCurrent
-                          ? 'bg-[#e65100]'
-                          : isAnswered
-                          ? 'bg-orange-300'
-                          : 'bg-stone-100'
-                      }`}
-                    />
-                  );
-                })}
+            /* ================= VIEW A: QUIZ QUESTION FORM ================= */
+            <div className="space-y-2">
+              {/* Title Header */}
+              <div>
+                <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Readiness quiz</h1>
+                <p className="text-xs text-stone-400 mt-1">
+                  {totalQuestions} short questions based on tonight's chat.
+                </p>
               </div>
 
-              {/* Answered counter */}
-              <p className="text-[11px] font-medium text-stone-400">
-                {answeredCount} of {totalQuestions} answered
-              </p>
-            </div>
-
-            {/* 2. Question Topic & Label */}
-            <div>
-              <p className="text-[11px] font-bold text-[#e65100] tracking-wider uppercase mb-2">
-                {currentQ.topic} · QUESTION {currentQuestionIdx + 1} OF {totalQuestions}
-              </p>
-              <h2 className="text-lg font-bold text-stone-900 leading-snug">
-                {currentQ.question}
-              </h2>
-            </div>
-
-            {/* 3. Dynamic Question Components */}
-            <div className="space-y-3 pt-2">
-              
-              {/* --- TYPE 1: MULTIPLE CHOICE (MCQ) --- */}
-              {currentQ.type === 'mcq' && currentQ.options && (
-                currentQ.options.map((option, idx) => {
-                  const isSelected = selectedAnswers[currentQuestionIdx] === idx;
-
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => handleSelectOption(idx)}
-                      className={`flex items-center gap-3.5 p-4 rounded-2xl border transition-all cursor-pointer select-none ${
-                        isSelected
-                          ? 'border-[#e65100] bg-[#fffaf7] shadow-sm'
-                          : 'border-stone-400 bg-white hover:bg-stone-50/80'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                        isSelected ? 'border-[#e65100] bg-white' : 'border-stone-300'
-                      }`}>
-                        {isSelected && <div className="w-2 h-2 rounded-full bg-[#e65100]" />}
-                      </div>
-                      <span className={`text-xs font-medium ${
-                        isSelected ? 'text-stone-950 font-semibold' : 'text-stone-700'
-                      }`}>
-                        {option}
-                      </span>
-                    </div>
-                  );
-                })
-              )}
-
-              {/* --- TYPE 2: TRUE / FALSE (BOOLEAN) --- */}
-              {currentQ.type === 'boolean' && (
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { label: 'True', value: 'true' },
-                    { label: 'False', value: 'false' },
-                  ].map((item) => {
-                    const isSelected = selectedAnswers[currentQuestionIdx] === item.value;
-
-                    return (
-                      <div
-                        key={item.value}
-                        onClick={() => handleSelectOption(item.value)}
-                        className={`flex items-center justify-center gap-3 p-5 rounded-2xl border text-center transition-all cursor-pointer select-none ${
-                          isSelected
-                            ? 'border-[#e65100] bg-[#fffaf7] shadow-sm font-bold text-[#e65100]'
-                            : 'border-stone-400 bg-white hover:bg-stone-50/80 text-stone-700'
-                        }`}
-                      >
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                          isSelected ? 'border-[#e65100] bg-white' : 'border-stone-300'
-                        }`}>
-                          {isSelected && <div className="w-2 h-2 rounded-full bg-[#e65100]" />}
-                        </div>
-                        <span className="text-sm font-semibold">{item.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* --- TYPE 3: SHORT ANSWER (TEXT) --- */}
-              {currentQ.type === 'text' && (
+              {/* QUIZ CARD CONTAINER */}
+              <div className="bg-white border border-stone-200/70 rounded-3xl p-8 shadow-sm space-y-8">
+                
+                {/* 1. Progress Steps Bar */}
                 <div className="space-y-2">
-                  <textarea
-                    rows={4}
-                    placeholder="Type your answer here..."
-                    value={(selectedAnswers[currentQuestionIdx] as string) || ''}
-                    onChange={(e) => handleTextChange(e.target.value)}
-                    className="w-full p-4 border border-stone-400 rounded-2xl text-xs font-medium placeholder:text-stone-300 focus:outline-none focus:border-[#e65100] focus:ring-1 focus:ring-[#e65100] transition-all bg-stone-50/30"
-                  />
-                  <p className="text-[10px] text-stone-400 text-right">
-                    Please provide a short summary or explanation.
+                  <div 
+                    className="grid gap-2"
+                    style={{ gridTemplateColumns: `repeat(${totalQuestions}, minmax(0, 1fr))` }}
+                  >
+                    {Array.from({ length: totalQuestions }).map((_, idx) => {
+                      const isCurrent = idx === currentQuestionIdx;
+                      const isAnswered =
+                        selectedAnswers[idx] !== undefined &&
+                        String(selectedAnswers[idx]).trim() !== '';
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            isCurrent
+                              ? 'bg-[#e65100]'
+                              : isAnswered
+                              ? 'bg-orange-300'
+                              : 'bg-stone-100'
+                          }`}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Answered counter */}
+                  <p className="text-[11px] font-medium text-stone-400">
+                    {answeredCount} of {totalQuestions} answered
                   </p>
                 </div>
-              )}
 
+                {/* 2. Question Topic & Label */}
+                <div>
+                  <p className="text-[11px] font-bold text-[#e65100] tracking-wider uppercase mb-2">
+                    {currentQ.topic} · QUESTION {currentQuestionIdx + 1} OF {totalQuestions}
+                  </p>
+                  <h2 className="text-lg font-bold text-stone-900 leading-snug">
+                    {currentQ.question}
+                  </h2>
+                </div>
+
+                {/* 3. Dynamic Question Components */}
+                <div className="space-y-3 pt-2">
+                  
+                  {/* --- TYPE 1: MULTIPLE CHOICE (MCQ) --- */}
+                  {currentQ.type === 'mcq' && currentQ.options && (
+                    currentQ.options.map((option, idx) => {
+                      const isSelected = selectedAnswers[currentQuestionIdx] === idx;
+
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => handleSelectOption(idx)}
+                          className={`flex items-center gap-3.5 p-4 rounded-2xl border transition-all cursor-pointer select-none ${
+                            isSelected
+                              ? 'border-[#e65100] bg-[#fffaf7] shadow-sm'
+                              : 'border-stone-200 bg-white hover:bg-stone-50/80'
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                            isSelected ? 'border-[#e65100] bg-white' : 'border-stone-300'
+                          }`}>
+                            {isSelected && <div className="w-2 h-2 rounded-full bg-[#e65100]" />}
+                          </div>
+                          <span className={`text-xs font-medium ${
+                            isSelected ? 'text-stone-950 font-semibold' : 'text-stone-700'
+                          }`}>
+                            {option}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+
+                  {/* --- TYPE 2: TRUE / FALSE (BOOLEAN) --- */}
+                  {currentQ.type === 'boolean' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { label: 'True', value: 'true' },
+                        { label: 'False', value: 'false' },
+                      ].map((item) => {
+                        const isSelected = selectedAnswers[currentQuestionIdx] === item.value;
+
+                        return (
+                          <div
+                            key={item.value}
+                            onClick={() => handleSelectOption(item.value)}
+                            className={`flex items-center justify-center gap-3 p-5 rounded-2xl border text-center transition-all cursor-pointer select-none ${
+                              isSelected
+                                ? 'border-[#e65100] bg-[#fffaf7] shadow-sm font-bold text-[#e65100]'
+                                : 'border-stone-200 bg-white hover:bg-stone-50/80 text-stone-700'
+                            }`}
+                          >
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                              isSelected ? 'border-[#e65100] bg-white' : 'border-stone-300'
+                            }`}>
+                              {isSelected && <div className="w-2 h-2 rounded-full bg-[#e65100]" />}
+                            </div>
+                            <span className="text-sm font-semibold">{item.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* --- TYPE 3: SHORT ANSWER (TEXT) --- */}
+                  {currentQ.type === 'text' && (
+                    <div className="space-y-2">
+                      <textarea
+                        rows={4}
+                        placeholder="Type your answer here..."
+                        value={(selectedAnswers[currentQuestionIdx] as string) || ''}
+                        onChange={(e) => handleTextChange(e.target.value)}
+                        className="w-full p-4 border border-stone-200 rounded-2xl text-xs font-medium placeholder:text-stone-300 focus:outline-none focus:border-[#e65100] focus:ring-1 focus:ring-[#e65100] transition-all bg-stone-50/30"
+                      />
+                      <p className="text-[10px] text-stone-400 text-right">
+                        Please provide a short summary or explanation.
+                      </p>
+                    </div>
+                  )}
+
+                </div>
+
+                {/* 4. Action Buttons (Back & Next Question) */}
+                <div className="flex items-center justify-between pt-4 border-t border-stone-100">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="px-6 py-2.5 rounded-full border border-stone-950 text-stone-950 text-xs font-bold hover:bg-stone-50 transition-all active:scale-[0.98] cursor-pointer"
+                  >
+                    Back
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!isOptionSelected}
+                    className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all shadow-sm ${
+                      isOptionSelected
+                        ? 'bg-[#e65100] hover:bg-[#d84315] text-white cursor-pointer active:scale-[0.98]'
+                        : 'bg-stone-200 text-stone-400 cursor-not-allowed opacity-70'
+                    }`}
+                  >
+                    {currentQuestionIdx === totalQuestions - 1 ? 'Submit' : 'Next question'}
+                  </button>
+                </div>
+
+              </div>
             </div>
 
-            {/* 4. Action Buttons (Back & Next Question) */}
-            <div className="flex items-center justify-between pt-4 border-t border-stone-100">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="px-6 py-2.5 rounded-full border border-stone-950 text-stone-950 text-xs font-bold hover:bg-stone-50 transition-all active:scale-[0.98] cursor-pointer"
-              >
-                Back
-              </button>
+          ) : (
 
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!isOptionSelected}
-                className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all shadow-sm ${
-                  isOptionSelected
-                    ? 'bg-[#e65100] hover:bg-[#d84315] text-white cursor-pointer active:scale-[0.98]'
-                    : 'bg-stone-200 text-stone-400 cursor-not-allowed opacity-70'
-                }`}
-              >
-                {currentQuestionIdx === totalQuestions - 1 ? 'Submit' : 'Next question'}
-              </button>
+            /* ================= VIEW B: QUIZ RESULTS ================= */
+            <div className="space-y-6">
+              
+              {/* Header Title + Action Button */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-bold text-stone-950 tracking-tight">Quiz results</h2>
+                  <p className="text-xs text-stone-500 mt-1">Here is your summary breakdown before class.</p>
+                </div>
+
+                <button 
+                  onClick={handleRetakeQuiz}
+                  className="inline-flex items-center gap-1.5 border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2 rounded-full text-xs font-semibold text-stone-700 transition-colors shadow-xs cursor-pointer active:scale-[0.98]"
+                >
+                  <RotateCcw size={13} />
+                  Retake Quiz
+                </button>
+              </div>
+
+              {/* Score Donut Card */}
+              <div className="bg-white border border-stone-200/60 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center gap-6">
+                <div className="relative w-32 h-32 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      className="text-stone-100"
+                      strokeWidth="4"
+                      stroke="currentColor"
+                      fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path
+                      className="text-[#e65100]"
+                      strokeWidth="4"
+                      strokeDasharray="85, 100"
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                  </svg>
+                  <div className="absolute flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl font-extrabold text-stone-900 tracking-tight">85</span>
+                    <span className="text-[10px] font-medium text-stone-400">/ 100</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <span className="inline-block px-2.5 py-0.5 bg-orange-100/80 text-[#e65100] text-[11px] font-bold rounded-full">
+                    Completed
+                  </span>
+                  <h3 className="text-base font-bold text-stone-900">Good job on completing the quiz!</h3>
+                  <p className="text-xs text-stone-500 leading-relaxed max-w-xl">
+                    You've answered all {totalQuestions} questions. Review your submitted answers grouped by question type below.
+                  </p>
+                </div>
+              </div>
+
+              {/* Question Breakdown by Question Type */}
+              <div className="bg-white border border-stone-200/60 rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 className="text-sm font-bold text-stone-900">Question breakdown</h3>
+
+                <div className="space-y-3">
+                  {QUIZ_QUESTIONS.map((q, idx) => (
+                    <div key={q.id} className="p-4 bg-stone-50/80 rounded-2xl border border-stone-100 space-y-2.5">
+                      
+                      {/* Top Header Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-stone-400">Q{idx + 1}</span>
+                          {renderTypeBadge(q.type)}
+                        </div>
+                        <span className="text-[11px] font-semibold text-[#e65100] uppercase tracking-wider">
+                          {q.topic}
+                        </span>
+                      </div>
+
+                      {/* Question Text */}
+                      <p className="text-xs font-bold text-stone-900 leading-snug">
+                        {q.question}
+                      </p>
+
+                      {/* Student Submitted Answer */}
+                      <div className="bg-white p-3 rounded-xl border border-stone-200/60 text-xs text-stone-700">
+                        <span className="font-semibold text-stone-400 block text-[10px] uppercase mb-0.5">
+                          Your answer
+                        </span>
+                        {getFormattedAnswer(q, idx)}
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+
             </div>
-
-          </div>
+          )}
 
         </div>
       </main>
