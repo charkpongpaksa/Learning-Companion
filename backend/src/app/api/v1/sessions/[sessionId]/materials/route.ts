@@ -9,11 +9,18 @@ export async function GET(
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
+    const userId = request.headers.get("x-user-id")
+    const userRole = request.headers.get("x-user-role")
     const { sessionId } = await params
 
-    // Check session exists
+    // Check session exists and caller has access
     const session = await prisma.classSession.findUnique({
-      where: { id: sessionId }
+      where: { id: sessionId },
+      include: {
+        subject: {
+          select: { teacherId: true }
+        }
+      }
     })
 
     if (!session) {
@@ -21,6 +28,14 @@ export async function GET(
         { error: "Session not found" },
         { status: 404 }
       )
+    }
+
+    if (userRole === "TEACHER" && session.subject.teacherId !== userId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 })
+    }
+
+    if (userRole === "STUDENT" && session.status !== "ACTIVE") {
+      return NextResponse.json({ error: "Session is not active" }, { status: 403 })
     }
 
     const materials = await prisma.material.findMany({
@@ -74,9 +89,9 @@ export async function POST(
 
     // Parse form data
     const formData = await request.formData()
-    const file = formData.get("file") as File
+    const file = formData.get("file")
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json(
         { error: "No file uploaded" },
         { status: 400 }
@@ -107,13 +122,28 @@ export async function POST(
     }
 
     // Create upload directory
-    const uploadDir = path.join(process.cwd(), "uploads", "materials", sessionId)
+    const uploadDir = path.join(
+      path.resolve(process.cwd(), process.env.UPLOAD_PATH ?? "uploads"),
+      "materials",
+      sessionId
+    )
     await mkdir(uploadDir, { recursive: true })
 
     // Save file
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`
+    const safeOriginalName = path.basename(file.name)
+      .replace(/[^a-zA-Z0-9._-]/g, "-")
+      .replace(/^-+|-+$/g, "")
+
+    if (!safeOriginalName) {
+      return NextResponse.json(
+        { error: "Invalid file name" },
+        { status: 400 }
+      )
+    }
+
+    const fileName = `${Date.now()}-${safeOriginalName}`
     const filePath = path.join(uploadDir, fileName)
     await writeFile(filePath, buffer)
 

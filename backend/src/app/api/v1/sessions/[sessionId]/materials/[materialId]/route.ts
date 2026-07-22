@@ -48,13 +48,37 @@ export async function DELETE(
       )
     }
 
-    // Delete file from local storage
+    if (material.sessionId !== sessionId) {
+      return NextResponse.json(
+        { error: "Material not found" },
+        { status: 404 }
+      )
+    }
+
+    const uploadRoot = path.join(
+      path.resolve(process.cwd(), process.env.UPLOAD_PATH ?? "uploads"),
+      "materials",
+      sessionId
+    )
+    const filePath = path.resolve(process.cwd(), `.${material.fileUrl}`)
+
+    if (!filePath.startsWith(`${uploadRoot}${path.sep}`)) {
+      return NextResponse.json(
+        { error: "Invalid material file path" },
+        { status: 500 }
+      )
+    }
+
+    // Delete file from local storage. A missing file should not prevent cleanup
+    // of its database record, but other file-system failures should.
     try {
-      const filePath = path.join(process.cwd(), material.fileUrl)
       await unlink(filePath)
-    } catch {
-      // File might not exist on disk — continue anyway
-      console.warn("File not found on disk:", material.fileUrl)
+    } catch (error) {
+      const errorCode = (error as NodeJS.ErrnoException).code
+
+      if (errorCode !== "ENOENT") {
+        throw error
+      }
     }
 
     // Delete from database
