@@ -1,9 +1,9 @@
-# /handoff — Pre-Study Agent Project
+# /handoff — Pre-Study Agent Backend
 
 ---
 
 ## Project Overview
-An AI-powered pre-study agent for university students that supports them before, during, and after class. The agent assesses students against teacher-defined criteria, helps them prepare for lectures, catches them up when they get lost, and gives teachers detailed insight into class understanding tracked all the way to semester goals.
+AI-powered pre-study agent for university students supporting before, during, and after class. Agent assesses students against teacher-defined criteria, helps prepare for lectures, catches up students who get lost, and gives teachers detailed insight tracked to semester goals.
 
 ---
 
@@ -16,102 +16,37 @@ Teammate 2  →  AI / Model
 
 ---
 
-## Repository Structure
-```
-root/
-├── frontend/     →  Next.js UI (frontend teammate)
-├── backend/      →  Next.js API (Chakphong)
-└── model/        →  AI service (AI teammate)
-```
-
-## Branch Strategy
-```
-main          →  stable, demo-ready
-dev           →  integration branch
-frontend/dev  →  frontend teammate
-backend/dev   →  Chakphong
-model/dev     →  AI teammate
-```
-
-**Merge flow:**
-```
-feature branch → teammate dev branch → dev → main
+## How To Run
+```bash
+cd backend
+docker-compose up -d    # start PostgreSQL, Redis, Qdrant
+npm run dev             # start Next.js dev server
 ```
 
 ---
 
-## Current State
+## Critical Next.js 16 Rules — NEVER FORGET
 
-**Completed:**
-- Full project brainstorm and architecture design
-- 5 layer architecture defined
-- Database schema designed (17 tables)
-- API documentation completed (11 categories, full request/response shapes)
-- Project folder structure created
-- Next.js initialized in `/backend` with `src/` directory
-- Docker setup complete (PostgreSQL, Redis, Qdrant)
-- Prisma initialized
-- lib files created (prisma.ts, redis.ts, ai.ts with mock responses)
-- Environment variables configured
-- Git branching strategy defined
+**1. Dynamic params must be awaited:**
+```typescript
+// WRONG — params resolves as undefined → 500 error
+{ params }: { params: { sessionId: string } }
+const { sessionId } = params
 
-**Not started yet:**
-- Prisma schema writing
-- API route implementation
-- Auth setup
-- Docker services not yet running
-- Frontend UI
-- AI model integration
-
----
-
-## Tech Stack
-
-| Category | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS + shadcn/ui |
-| State Management | Zustand |
-| Authentication | NextAuth.js |
-| Backend | Next.js API Routes |
-| ORM | Prisma |
-| Database | PostgreSQL (Docker) |
-| Cache + Rate Limit | Redis (Docker) |
-| Vector DB | Qdrant (Docker) |
-| File Storage | Local file system (`/uploads`) |
-| AI Model | Local model + Gemini/DeepSeek fallback |
-| Charts | Recharts (frontend) |
-| Background Jobs | Manual trigger for demo, Cron after |
-
----
-
-## Backend Folder Structure
+// CORRECT
+{ params }: { params: Promise<{ sessionId: string }> }
+const { sessionId } = await params
 ```
-backend/
-├── src/
-│   ├── app/
-│   │   └── api/
-│   │       └── v1/
-│   │           ├── auth/
-│   │           ├── sessions/
-│   │           ├── chat/
-│   │           ├── quiz/
-│   │           ├── reports/
-│   │           ├── users/
-│   │           └── training/
-│   └── lib/
-│       ├── prisma.ts     →  Prisma client singleton
-│       ├── redis.ts      →  Redis client singleton
-│       └── ai.ts         →  AI teammate endpoint calls (mock active)
-├── prisma/
-│   └── schema.prisma
-├── uploads/
-│   └── .gitkeep
-├── docker-compose.yml
-├── .env
-├── .env.example
-└── package.json
+
+**2. Use proxy.ts not middleware.ts:**
+```typescript
+// WRONG
+src/middleware.ts
+export function middleware() {}
+
+// CORRECT
+src/proxy.ts
+export function proxy() {}
 ```
 
 ---
@@ -129,66 +64,109 @@ UPLOAD_PATH="./uploads"
 
 ---
 
-## Docker Services
-```yaml
-postgres  →  port 5432  →  main database
-redis     →  port 6379  →  conversation cache + rate limiting
-qdrant    →  port 6333  →  vector embeddings for RAG
-```
+## Auth System
+JWT stored in httpOnly cookie + Bearer token in Authorization header.
 
-Start all services:
-```bash
-cd backend
-docker-compose up -d
-```
-
----
-
-## Database — 17 Tables (PostgreSQL via Prisma)
-
-```
-1.  Users                →  Student + teacher accounts
-2.  Subjects             →  Courses per teacher
-3.  SemesterCriteria     →  End of semester learning goals
-4.  ClassSessions        →  Each class with status + phase
-5.  SessionCriteria      →  Per class criteria mapped to semester goals
-6.  Materials            →  Uploaded files (local path + isProcessed flag)
-7.  Conversations        →  One per student per phase per session
-8.  Messages             →  All chat messages
-9.  ConversationSummary  →  Running summary updated every 6 messages
-10. Quizzes              →  Quiz per student per session
-11. QuizQuestions        →  Each question tagged to a session criteria
-12. CriteriaResults      →  Final verdict per criteria after scoring
-13. DuringClassLogs      →  Questions asked during class mapped to criteria
-14. SessionReports       →  Class wide aggregated report per session
-15. StudentReports       →  Per student breakdown per session
-16. TrainingData         →  External API answers for local model fine-tuning
-17. WeeklySummaries      →  Weekly AI generated summary per subject
-```
-
-**Qdrant collection (separate from PostgreSQL):**
-```
-material_chunks
-├── vector (embedding from AI teammate)
-└── payload
-    ├── materialId   ←  links back to Materials table
-    ├── sessionId
-    ├── content
-    └── chunkIndex
-```
-
----
-
-## Key Enums
+**Reading user in any route:**
 ```typescript
-Role:           STUDENT | TEACHER
-SessionStatus:  UPCOMING | ACTIVE | COMPLETED
-Phase:          BEFORE | DURING | AFTER
-MessageRole:    STUDENT | AGENT
-QuestionType:   DIRECT | SCENARIO | REASONING | EDGE_CASE | REAL_WORLD
-Readiness:      READY | PARTIAL | NOT_READY
-CriteriaStatus: MET | PARTIAL | NOT_MET
+const userId       = request.headers.get("x-user-id")
+const userRole     = request.headers.get("x-user-role")
+const userName     = request.headers.get("x-user-name")
+const userLanguage = request.headers.get("x-user-language")
+const userEmail    = request.headers.get("x-user-email")
 ```
+
+---
+
+## AI Integration Contract
+
+**Chat:**
+```typescript
+POST http://localhost:8000/chat
+// Send
+{
+  phase: "before" | "during" | "after",
+  language: "th" | "en",
+  studentMessage: string,
+  recentMessages: Message[],
+  summary: string,
+  sessionCriteria: Criteria[],
+  teacherMaterial: string
+}
+// Receive
+{
+  response: string,
+  confidence: number,           // below 0.7 = used external API
+  usedExternalAPI: boolean,
+  externalSource: "gemini" | "deepseek" | null,
+  flaggedCriteria: string[],
+  detectedLanguage: "th" | "en"
+}
+```
+
+**Image Analysis:**
+```typescript
+POST http://localhost:8000/analyze-image
+// Send
+{
+  imageUrl: string,
+  sessionId: string,
+  availableMaterials: Material[]
+}
+// Receive
+{
+  materialId: string | null,
+  pageNumber: number | null,
+  confidence: number,
+  description: string
+}
+```
+
+**Report Insight:**
+```typescript
+POST http://localhost:8000/insight
+// Send
+{
+  criteriaResults: CriteriaResult[],
+  duringClassLogs: DuringClassLog[],
+  caughtUpCount: number,
+  totalStudents: number
+}
+// Receive
+{
+  insight: string
+}
+```
+
+**Mock responses active in `src/lib/ai.ts`** — uncomment real calls on integration day.
+
+---
+
+## Database — 18 Tables
+```
+1.  Users
+2.  Subjects
+3.  SemesterCriteria
+4.  ClassSessions
+5.  SessionCriteria
+6.  Materials            ← isProcessed flag tracks if chunked to Qdrant
+7.  Conversations        ← one per student per phase per session
+8.  Messages
+9.  ConversationSummary  ← updated every 6 messages
+10. Quizzes
+11. QuizQuestions        ← tagged to SessionCriteria internally
+12. CriteriaResults      ← MET / PARTIAL / NOT_MET per criteria
+13. DuringClassLogs
+14. SessionReports
+15. StudentReports
+16. TrainingData         ← external API answers for fine-tuning
+17. WeeklySummaries
+18. ChatImageLogs        ← images sent in chat + material/page reference
+```
+
+**Qdrant** stores material chunk embeddings — NOT in PostgreSQL.
+
+---
 
 ## Valid Session Phase Transitions
 ```
@@ -200,200 +178,167 @@ ACTIVE + AFTER     →  COMPLETED + AFTER
 
 ---
 
-## AI Integration Contract
-
-**Backend → AI teammate (chat):**
-```typescript
-POST http://localhost:8000/chat
-{
-  phase: "before" | "during" | "after",
-  language: "th" | "en",
-  studentMessage: string,
-  recentMessages: Message[],      // last 5-6 messages
-  summary: string,                // running conversation summary
-  sessionCriteria: Criteria[],    // from DB — used as rubric
-  teacherMaterial: string         // retrieved chunk from Qdrant
-}
+## What's Done ✅
 ```
+Auth
+├── POST /api/v1/auth/register
+├── POST /api/v1/auth/login        ← returns token in body
+├── GET  /api/v1/auth/session
+└── POST /api/v1/auth/logout
 
-**AI teammate → Backend (chat response):**
-```typescript
-{
-  response: string,
-  confidence: number,             // 0-1, below 0.7 = used external API
-  usedExternalAPI: boolean,
-  externalSource: "gemini" | "deepseek" | null,
-  flaggedCriteria: string[],      // criteria IDs agent flagged as confused
-  detectedLanguage: "th" | "en"
-}
-```
+Subjects
+├── GET/POST /api/v1/subjects
+├── GET/PATCH/DELETE /api/v1/subjects/[subjectId]
+├── GET/POST /api/v1/subjects/[subjectId]/semester-criteria
+└── PATCH/DELETE /api/v1/subjects/[subjectId]/semester-criteria/[criteriaId]
 
-**Backend → AI teammate (report insight):**
-```typescript
-POST http://localhost:8000/insight
-{
-  criteriaResults: CriteriaResult[],
-  duringClassLogs: DuringClassLog[],
-  caughtUpCount: number,
-  totalStudents: number
-}
-```
-
-**AI teammate → Backend (insight response):**
-```typescript
-{
-  insight: string    // natural language paragraph for teacher
-}
-```
-
-**Mock responses are active in `src/lib/ai.ts`** — uncomment real calls on integration day.
-
----
-
-## API Base URL
-```
-http://localhost:3000/api/v1
-```
-
-## API Categories
-```
-1.  Auth              →  /api/v1/auth/*
-2.  Users             →  /api/v1/users/*
-3.  Subjects          →  /api/v1/subjects/*
-4.  Semester Criteria →  /api/v1/subjects/[id]/semester-criteria/*
-5.  Sessions          →  /api/v1/sessions/*
-6.  Session Criteria  →  /api/v1/sessions/[id]/criteria/*
-7.  Materials         →  /api/v1/sessions/[id]/materials/*
-8.  Chat              →  /api/v1/chat/*
-9.  Quiz              →  /api/v1/quiz/*
-10. Reports           →  /api/v1/reports/*
-11. Training          →  /api/v1/training/*
-```
-
-Full request/response shapes for every endpoint are documented in the API Reference Document shared with the team.
-
----
-
-## Role Permissions Summary
-```
-Students  →  chat, quiz, view own reports, view active sessions
-Teachers  →  manage subjects, sessions, criteria, materials, view all reports
-Internal  →  training/store (backend only, never called by frontend)
+Sessions
+├── GET/POST /api/v1/sessions
+├── GET/PATCH/DELETE /api/v1/sessions/[sessionId]
+├── PATCH /api/v1/sessions/[sessionId]/status
+├── GET/POST /api/v1/sessions/[sessionId]/criteria
+├── PATCH/DELETE /api/v1/sessions/[sessionId]/criteria/[criteriaId]
+├── GET/POST /api/v1/sessions/[sessionId]/materials
+└── DELETE /api/v1/sessions/[sessionId]/materials/[materialId]
 ```
 
 ---
 
-## 3 Phase System
+## What's NOT Done ❌ — Build These Next
+
+### Priority 1 — Users
 ```
-BEFORE  →  Adaptive quiz (10-20 questions), criteria verdict, Ready/Not Ready
-DURING  →  Fast 2-3 sentence answers, logs questions to criteria, silent TA mode
-AFTER   →  Deep catch up, re-test weak criteria, feeds teacher report
+GET/PATCH /api/v1/users/me
 ```
 
-## Criteria System
+### Priority 2 — Chat (most important)
 ```
-Semester Criteria  →  Big semester goals, defined once per subject
-      ↓
-Session Criteria   →  Today's specific criteria, maps to semester goals
-      ↓
-Quiz Questions     →  Tagged to criteria internally (student never sees mapping)
-      ↓
-Criteria Results   →  MET / PARTIAL / NOT_MET per criteria
-      ↓
-Reports            →  Session → Week → Semester level insights
+POST /api/v1/chat
+GET  /api/v1/chat/history/[sessionId]
+POST /api/v1/chat/upload
+POST /api/v1/chat/image-log          ← internal, backend calls automatically
 ```
 
-## Question Types Per Quiz
+### Priority 3 — Quiz
 ```
-Direct (Q1-4)      →  Baseline knowledge
-Scenario (Q5-9)    →  Application
-Reasoning (Q10-13) →  Deeper understanding
-Edge case (Q14-17) →  Mastery
-Real world (Q18-20)→  Synthesis
+POST /api/v1/quiz/generate
+POST /api/v1/quiz/submit
+GET  /api/v1/quiz/history/[sessionId]
 ```
 
-## Redis Conversation Cache
+### Priority 4 — Reports
 ```
+POST /api/v1/reports/trigger/[sessionId]
+GET  /api/v1/reports/session/[sessionId]
+GET  /api/v1/reports/student/[studentId]
+POST /api/v1/reports/weekly/generate
+GET  /api/v1/reports/weekly/[subjectId]
+GET  /api/v1/reports/materials/[sessionId]
+```
+
+### Priority 5 — Training
+```
+POST /api/v1/training/store          ← internal, backend calls automatically
+```
+
+---
+
+## What Each Unbuilt Route Does
+
+**POST /api/v1/chat**
+- Main agent bridge
+- Pull conversation context from Redis
+- Package context + send to AI teammate at `localhost:8000/chat`
+- Store message in PostgreSQL
+- Update Redis cache
+- Trigger summary every 6 messages
+- If AI used external API → store in TrainingData table
+
+**POST /api/v1/chat/upload**
+- Student uploads image or file in chat
+- Store file in `/uploads/chat/[sessionId]/[studentId]/`
+- Send image to AI teammate for analysis
+- AI returns materialId + pageNumber
+- Store in ChatImageLog
+- Return AI response + fileUrl to frontend
+
+**POST /api/v1/quiz/generate**
+- Request quiz questions from AI teammate
+- Store quiz + questions in DB
+- Tag each question to a SessionCriteria
+- Never send criteriaId or correctConcept to frontend
+
+**POST /api/v1/quiz/submit**
+- Receive student answers
+- Send each answer to AI for scoring (separate AI call)
+- Store CriteriaResults
+- Calculate readiness verdict
+- Return score + feedback per criteria
+
+**POST /api/v1/reports/trigger/[sessionId]**
+- Check session is COMPLETED
+- Aggregate all quiz scores per criteria
+- Aggregate during class logs
+- Check who completed after class
+- Send to AI for insight
+- Store SessionReport + StudentReports
+
+**POST /api/v1/reports/weekly/generate**
+- Aggregate all sessions in the week
+- Calculate avg readiness + semester progress
+- Send to AI for natural language summary
+- Store WeeklySummary
+
+**GET /api/v1/reports/materials/[sessionId]**
+- Aggregate ChatImageLogs for session
+- Group by materialId + pageNumber
+- Return most referenced materials and pages
+
+---
+
+## Redis — Conversation Cache Structure
+```javascript
 Key:    "conversation:{studentId}:{sessionId}"
 Value:  {
-          recentMessages: [...],   // last 5-6 messages
-          summary: "...",          // running summary
-          phase: "before",
-          language: "th"
-        }
+  recentMessages: [...],   // last 5-6 messages only
+  summary: "...",          // running summary
+  phase: "before",
+  language: "th"
+}
 Expiry: 24 hours
-Summary trigger: every 6 messages
+Summary trigger: every 6 messages → summarize → update Redis + save to DB
 ```
 
 ---
 
-## AI Model Architecture
-```
-Student message
-↓
-Local model answers first
-Confidence ≥ 0.7  →  Return local response
-Confidence < 0.7  →  Fallback to Gemini / DeepSeek
-                  →  Store answer in TrainingData table
-                  →  Return external response
-```
+## Proxy Route Protection
+```typescript
+const teacherOnlyRoutes = [
+  "/api/v1/subjects",
+  "/api/v1/sessions",
+  "/api/v1/reports/trigger",
+  "/api/v1/reports/session",
+  "/api/v1/reports/weekly",
+  "/api/v1/reports/materials"
+]
 
----
-
-## Data Lifecycle Plan
-```
-Current semester   →  PostgreSQL active
-Last 2 years       →  PostgreSQL archive schema (read only)
-2-4 years          →  Local export / cold storage
-4-10 years         →  Glacier equivalent
-After 10 years     →  Deleted
+const studentOnlyRoutes = [
+  "/api/v1/chat",
+  "/api/v1/quiz"
+]
 ```
 
 ---
 
-## 1 Week Backend Sprint Plan
-```
-Day 1  →  Project setup, Docker, Prisma schema, migrations (IN PROGRESS)
-Day 2  →  Auth (NextAuth, student + teacher login, role protection)
-Day 3  →  Session + criteria management API
-Day 4  →  Chat route + Redis conversation cache + summary logic
-Day 5  →  Quiz engine (generate, score, store, verdict)
-Day 6  →  Reports + aggregation + trigger route
-Day 7  →  Integration with AI + frontend teammates, testing
-```
+## Important Notes
+- **Mock AI responses active** in `src/lib/ai.ts` — uncomment real calls on integration day
+- **MaterialChunks NOT in PostgreSQL** — lives in Qdrant, linked via `materialId` in payload
+- **Session criteria + correctConcept never sent to frontend** — backend only
+- **File storage is local** `/uploads` — swap to cloud later, no schema change needed
+- **Rate limiting needed on `/api/v1/chat`** — use Upstash Redis or ioredis counter
+- **Report generation is manual trigger** — no Cron Job needed for demo
+- **Confidence threshold is 0.7** — below this triggers external API fallback
+- **Thai + English supported** — AI auto detects language from student message
+- **One conversation per student per phase per session** — BEFORE DURING AFTER separate
 
 ---
-
-## Next Immediate Step
-Write the Prisma schema (`/backend/prisma/schema.prisma`) with all 17 tables and enums, then run migrations against the Docker PostgreSQL instance.
-
-```bash
-# After writing schema
-cd backend
-npx prisma migrate dev --name init
-npx prisma generate
-```
-
----
-
-## Important Notes For Next Agent
-
-- **Mock AI responses are active** in `src/lib/ai.ts` — do not remove, just uncomment real calls on Day 7
-- **MaterialChunks table does NOT exist in PostgreSQL** — chunks live in Qdrant, linked back via `materialId` in payload
-- **`isProcessed` flag on Materials table** — tells backend whether file has been chunked and sent to Qdrant by AI teammate
-- **Session criteria IDs and correctConcept are never sent to frontend** — backend only, used for scoring
-- **File storage is local** (`/uploads`) not AWS S3 — `fileUrl` stores local path, swap to S3 URL later with no schema change needed
-- **Rate limiting is on `/api/v1/chat` route** — targets abuse not genuine questions
-- **Report generation is manual trigger for demo** — Vercel Cron Job added after demo
-- **Thai and English both supported** — AI auto detects language from student message and responds in same language
-- **Technical terms stay in English even in Thai responses** — EC2, IAM, S3 etc.
-- **One conversation per student per phase per session** — BEFORE, DURING, AFTER are separate conversations in DB
-
----
-
-## Questions To Clarify With Team Before Day 7
-- Confirm AI teammate's local service port (currently assumed `8000`)
-- Confirm confidence threshold value (currently assumed `0.7`)
-- Confirm Qdrant collection name (currently assumed `material_chunks`)
-- Confirm file size limit for material uploads
-- Agree on quiz question count range per phase (currently `10-20`)
