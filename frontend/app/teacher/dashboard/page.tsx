@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
 import React from "react";
-import Link from 'next/link';
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CalendarDays,
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 // ดึงข้อมูลวิชาและบทเรียนจากไฟล์ data.ts
-import { TEACHER_SUBJECTS, TEACHER_SESSIONS } from './data';
+import { TEACHER_SUBJECTS, TEACHER_SESSIONS } from "./data";
 
 type TeacherSubject = {
   id: number;
@@ -368,97 +368,114 @@ export default function TeacherDashboard() {
           {/* ลูปแสดงการ์ดบทเรียนของแต่ละสัปดาห์ */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[480px] items-start content-start pb-12">
             {filteredSessions.length > 0 ? (
-              filteredSessions.map((session: TeacherSession) => (
-                <div
-                  key={session.id}
-                  className="bg-white border border-stone-200/60 rounded-xl p-4 flex flex-col h-full shadow-sm hover:shadow-md/5 transition-all text-left"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
-                        {session.week}
-                      </span>
+              filteredSessions.map((session: TeacherSession) => {
+                const isUpcoming = session.status === "Upcoming";
+                const CardWrapper = isUpcoming ? "div" : Link;
 
-                      <div className="flex items-center gap-1.5">
-                        {session.status === "Completed" && (
-                          <span className="px-2.5 py-0.5 bg-[#e6f4ea] text-[#137333] rounded-full text-[10px] font-bold border border-[#ceead6]">
-                            Completed
-                          </span>
-                        )}
-                        {session.status === "Active" && (
-                          <span className="px-2.5 py-0.5 bg-[#fff3ed] text-[#d84315] rounded-full text-[10px] font-bold border border-orange-100">
-                            Active
-                          </span>
-                        )}
-                        {session.status === "Upcoming" && (
-                          <>
-                            <span className="px-2.5 py-0.5 bg-white text-stone-500 border border-stone-200 rounded-full text-[10px] font-semibold">
-                              Upcoming
+                // กำหนด props สำหรับ CardWrapper ตามประเภทของ Component
+                const wrapperProps = isUpcoming
+                  ? {
+                      className:
+                        "bg-white border border-stone-200/60 rounded-xl p-4 flex flex-col h-full shadow-sm transition-all text-left",
+                    }
+                  : {
+                      href: `/teacher/session/${session.id}`,
+                      className:
+                        "bg-white border border-stone-200/60 rounded-xl p-4 flex flex-col h-full shadow-sm hover:shadow-md/5 transition-all text-left",
+                    };
+
+                return (
+                  <CardWrapper key={session.id} {...(wrapperProps as any)}>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+                          {session.week}
+                        </span>
+
+                        <div className="flex items-center gap-1.5">
+                          {session.status === "Completed" && (
+                            <span className="px-2.5 py-0.5 bg-[#e6f4ea] text-[#137333] rounded-full text-[10px] font-bold border border-[#ceead6]">
+                              Completed
                             </span>
-                            <button
-                              onClick={() =>
-                                alert(`Delete session: ${session.title}`)
-                              }
-                              className="w-7 h-7 flex items-center justify-center bg-white text-stone-500 border border-stone-200 rounded-xl hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm cursor-pointer active:scale-[0.95]"
-                              title="Delete session"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </>
+                          )}
+                          {session.status === "Active" && (
+                            <span className="px-2.5 py-0.5 bg-[#fff3ed] text-[#d84315] rounded-full text-[10px] font-bold border border-orange-100">
+                              Active
+                            </span>
+                          )}
+                          {session.status === "Upcoming" && (
+                            <>
+                              <span className="px-2.5 py-0.5 bg-white text-stone-500 border border-stone-200 rounded-full text-[10px] font-semibold">
+                                Upcoming
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  alert(`Delete session: ${session.title}`);
+                                }}
+                                className="w-7 h-7 flex items-center justify-center bg-white text-stone-500 border border-stone-200 rounded-xl hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm cursor-pointer active:scale-[0.95]"
+                                title="Delete session"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <h4 className="text-base font-bold text-stone-900 leading-snug mb-3">
+                        {session.title}
+                      </h4>
+
+                      <div className="grid grid-cols-4 gap-1 mb-2">
+                        {session.segments?.map(
+                          (colorClass: string, index: number) => (
+                            <div
+                              key={index}
+                              className={`h-1.5 rounded-full ${colorClass}`}
+                            />
+                          ),
                         )}
+                      </div>
+
+                      <div className="flex justify-between items-center text-[11px] text-stone-400 font-medium mb-2">
+                        <span>Avg readiness</span>
+                        <span
+                          className={`font-semibold ${session.status !== "Upcoming" ? "text-stone-700" : ""}`}
+                        >
+                          {session.avgReadiness}
+                        </span>
                       </div>
                     </div>
 
-                    <h4 className="text-base font-bold text-stone-900 leading-snug mb-3">
-                      {session.title}
-                    </h4>
+                    {(session.status === "Upcoming" || session.isLive) && (
+                      <div className="pt-2.5 mt-2 border-t border-stone-100 flex flex-col justify-center">
+                        {session.status === "Upcoming" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              router.push(`/teacher/session/${session.id}`);
+                            }}
+                            className="w-full py-2 bg-[#fff8f5] border border-orange-200/80 text-[13px] text-[#d84315] font-bold rounded-full flex items-center justify-center gap-1 hover:bg-[#fff3ed] hover:border-orange-300 transition-all active:scale-[0.99] cursor-pointer shadow-sm"
+                          >
+                            Start this session →
+                          </button>
+                        )}
 
-                    <div className="grid grid-cols-4 gap-1 mb-2">
-                      {session.segments?.map(
-                        (colorClass: string, index: number) => (
-                          <div
-                            key={index}
-                            className={`h-1.5 rounded-full ${colorClass}`}
-                          />
-                        ),
-                      )}
-                    </div>
-
-                    <div className="flex justify-between items-center text-[11px] text-stone-400 font-medium mb-2">
-                      <span>Avg readiness</span>
-                      <span
-                        className={`font-semibold ${session.status !== "Upcoming" ? "text-stone-700" : ""}`}
-                      >
-                        {session.avgReadiness}
-                      </span>
-                    </div>
-                  </div>
-
-                  {(session.status === "Upcoming" || session.isLive) && (
-                    <div className="pt-2.5 mt-2 border-t border-stone-100 flex flex-col justify-center">
-                      {session.status === "Upcoming" && (
-                        <button
-                          onClick={() =>
-                            alert(`Starting session: ${session.title}`)
-                          }
-                          className="w-full py-2 bg-[#fff8f5] border border-orange-200/80 text-[13px] text-[#d84315] font-bold rounded-full flex items-center justify-center gap-1 hover:bg-[#fff3ed] hover:border-orange-300 transition-all active:scale-[0.99] cursor-pointer shadow-sm"
-                        >
-                          Start this session →
-                        </button>
-                      )}
-
-                      {session.isLive && (
-                        <div className="text-[11px] text-rose-500 font-bold flex items-center gap-1.5 py-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                          <span className="hover:underline cursor-pointer">
-                            Live now — view questions
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))
+                        {session.isLive && (
+                          <div className="text-[11px] text-rose-500 font-bold flex items-center gap-1.5 py-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                            <span className="hover:underline cursor-pointer">
+                              Live now — view questions
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardWrapper>
+                );
+              })
             ) : (
               <div className="col-span-full py-32 text-center select-none">
                 <p className="text-xs font-bold text-stone-500">
