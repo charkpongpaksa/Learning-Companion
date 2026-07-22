@@ -69,10 +69,20 @@ export async function POST(
     const teacherId = request.headers.get("x-user-id")
     const { sessionId } =  await params
     const body = await request.json()
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
     const { description, goal, order, semesterCriteriaId } = body
 
     // Validate required fields
-    if (!description || !goal || order === undefined) {
+    if (
+      typeof description !== "string" || !description.trim() ||
+      typeof goal !== "string" || !goal.trim() ||
+      !Number.isInteger(order) || order < 0 ||
+      (semesterCriteriaId !== undefined && semesterCriteriaId !== null && typeof semesterCriteriaId !== "string")
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -104,11 +114,25 @@ export async function POST(
       )
     }
 
+    if (semesterCriteriaId) {
+      const semesterCriteria = await prisma.semesterCriteria.findFirst({
+        where: { id: semesterCriteriaId, subjectId: session.subjectId },
+        select: { id: true }
+      })
+
+      if (!semesterCriteria) {
+        return NextResponse.json(
+          { error: "Semester criteria not found for this session's subject" },
+          { status: 404 }
+        )
+      }
+    }
+
     const criteria = await prisma.sessionCriteria.create({
       data: {
         sessionId,
-        description,
-        goal,
+        description: description.trim(),
+        goal: goal.trim(),
         order,
         semesterCriteriaId: semesterCriteriaId || null
       }

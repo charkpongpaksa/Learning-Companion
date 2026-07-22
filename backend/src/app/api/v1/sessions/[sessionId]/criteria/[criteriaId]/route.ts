@@ -10,7 +10,21 @@ export async function PATCH(
     const teacherId = request.headers.get("x-user-id")
     const { sessionId, criteriaId } = await params
     const body = await request.json()
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid fields" }, { status: 400 })
+    }
+
     const { description, goal, order, semesterCriteriaId } = body
+
+    if (
+      (description !== undefined && (typeof description !== "string" || !description.trim())) ||
+      (goal !== undefined && (typeof goal !== "string" || !goal.trim())) ||
+      (order !== undefined && (!Number.isInteger(order) || order < 0)) ||
+      (semesterCriteriaId !== undefined && semesterCriteriaId !== null && typeof semesterCriteriaId !== "string")
+    ) {
+      return NextResponse.json({ error: "Invalid fields" }, { status: 400 })
+    }
 
     // Check session exists and teacher owns it
     const session = await prisma.classSession.findUnique({
@@ -48,11 +62,32 @@ export async function PATCH(
       )
     }
 
+    if (existing.sessionId !== sessionId) {
+      return NextResponse.json(
+        { error: "Criteria not found" },
+        { status: 404 }
+      )
+    }
+
+    if (semesterCriteriaId) {
+      const semesterCriteria = await prisma.semesterCriteria.findFirst({
+        where: { id: semesterCriteriaId, subjectId: session.subjectId },
+        select: { id: true }
+      })
+
+      if (!semesterCriteria) {
+        return NextResponse.json(
+          { error: "Semester criteria not found for this session's subject" },
+          { status: 404 }
+        )
+      }
+    }
+
     const criteria = await prisma.sessionCriteria.update({
       where: { id: criteriaId },
       data: {
-        description: description || existing.description,
-        goal: goal || existing.goal,
+        description: description !== undefined ? description.trim() : existing.description,
+        goal: goal !== undefined ? goal.trim() : existing.goal,
         order: order !== undefined ? order : existing.order,
         semesterCriteriaId: semesterCriteriaId !== undefined
           ? semesterCriteriaId
@@ -113,6 +148,13 @@ export async function DELETE(
     })
 
     if (!existing) {
+      return NextResponse.json(
+        { error: "Criteria not found" },
+        { status: 404 }
+      )
+    }
+
+    if (existing.sessionId !== sessionId) {
       return NextResponse.json(
         { error: "Criteria not found" },
         { status: 404 }
