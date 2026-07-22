@@ -13,7 +13,8 @@ const teacherOnlyRoutes = [
   "/api/v1/sessions",
   "/api/v1/reports/trigger",
   "/api/v1/reports/session",
-  "/api/v1/reports/weekly"
+  "/api/v1/reports/weekly",
+  "/api/v1/reports/materials"
 ]
 
 // Routes that only students can access
