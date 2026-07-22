@@ -35,10 +35,16 @@ export async function POST(request: NextRequest) {
   try {
     const teacherId = request.headers.get("x-user-id")
     const body = await request.json()
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Subject name is required" }, { status: 400 })
+    }
+
     const { name, description } = body
 
     // Validate required fields
-    if (!name) {
+    if (typeof name !== "string" || !name.trim() ||
+      (description !== undefined && description !== null && typeof description !== "string")) {
       return NextResponse.json(
         { error: "Subject name is required" },
         { status: 400 }
@@ -47,8 +53,8 @@ export async function POST(request: NextRequest) {
 
     const subject = await prisma.subject.create({
       data: {
-        name,
-        description: description || null,
+        name: name.trim(),
+        description: description?.trim() || null,
         teacherId: teacherId!
       }
     })

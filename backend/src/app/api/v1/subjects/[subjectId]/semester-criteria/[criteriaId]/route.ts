@@ -43,6 +43,13 @@ export async function PATCH(
       )
     }
 
+    if (existing.subjectId !== subjectId) {
+      return NextResponse.json(
+        { error: "Criteria not found" },
+        { status: 404 }
+      )
+    }
+
     const criteria = await prisma.semesterCriteria.update({
       where: { id: criteriaId },
       data: {
@@ -100,6 +107,13 @@ export async function DELETE(
     })
 
     if (!existing) {
+      return NextResponse.json(
+        { error: "Criteria not found" },
+        { status: 404 }
+      )
+    }
+
+    if (existing.subjectId !== subjectId) {
       return NextResponse.json(
         { error: "Criteria not found" },
         { status: 404 }

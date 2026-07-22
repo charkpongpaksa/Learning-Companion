@@ -51,13 +51,25 @@ export async function GET(
 // PATCH /api/v1/subjects/[subjectId] — update subject
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { subjectId: string } }
+  { params }: { params: Promise<{ subjectId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { subjectId } = params
+    const { subjectId } = await params
     const body = await request.json()
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid fields" }, { status: 400 })
+    }
+
     const { name, description } = body
+
+    if (
+      (name !== undefined && (typeof name !== "string" || !name.trim())) ||
+      (description !== undefined && description !== null && typeof description !== "string")
+    ) {
+      return NextResponse.json({ error: "Invalid fields" }, { status: 400 })
+    }
 
     // Check subject exists and teacher owns it
     const existing = await prisma.subject.findUnique({
@@ -81,8 +93,8 @@ export async function PATCH(
     const subject = await prisma.subject.update({
       where: { id: subjectId },
       data: {
-        name: name || existing.name,
-        description: description !== undefined ? description : existing.description
+        name: name !== undefined ? name.trim() : existing.name,
+        description: description !== undefined ? description?.trim() || null : existing.description
       }
     })
 
@@ -103,11 +115,11 @@ export async function PATCH(
 // DELETE /api/v1/subjects/[subjectId] — delete subject
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { subjectId: string } }
+  { params }: { params: Promise<{ subjectId: string }> }
 ) {
   try {
     const teacherId = request.headers.get("x-user-id")
-    const { subjectId } = params
+    const { subjectId } = await params
 
     // Check subject exists and teacher owns it
     const existing = await prisma.subject.findUnique({
