@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import TeacherSidebar from "@/components/teachersidebar";
 import { useRouter } from "next/navigation";
 import {
   CalendarDays,
@@ -45,7 +46,7 @@ type TeacherSession = {
   isLive?: boolean;
 };
 
-export default function TeacherDashboard() {
+export default function Page() {
   const router = useRouter();
 
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -130,144 +131,7 @@ export default function TeacherDashboard() {
 
   return (
     <div className="flex min-h-screen bg-[#fdfbf7] text-stone-900 font-sans">
-      {/* LEFT SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-stone-200/60 flex flex-col justify-between fixed h-full z-20">
-        <div>
-          <div className="p-5 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#e65100]" />
-            <h1 className="text-md font-bold tracking-tight text-stone-950">
-              Learning Companion
-            </h1>
-          </div>
-
-          {/* รายการวิชา & ปุ่ม Add Subject */}
-          <div className="px-3 mb-6 relative">
-            <div
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center justify-between p-2.5 bg-white border border-stone-200/80 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors select-none"
-            >
-              <div className="text-left min-w-0 flex-1">
-                <p className="text-[13px] font-bold text-stone-900 truncate pr-1">
-                  {selectedSubject.code} · {selectedSubject.name}
-                </p>
-                <p className="text-[10px] text-stone-400 font-medium">
-                  {TEACHER_SUBJECTS.length} subjects
-                </p>
-              </div>
-              <ChevronDown
-                size={16}
-                className={`text-stone-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? "rotate-180" : ""}`}
-              />
-            </div>
-
-            {isDropdownOpen && (
-              <div className="absolute left-3 right-3 top-full mt-1.5 bg-white border border-stone-200 shadow-xl rounded-xl z-30 overflow-hidden p-1 space-y-0.5">
-                {TEACHER_SUBJECTS.map((subject: TeacherSubject) => {
-                  const isSelected = subject.id === selectedSubject.id;
-                  return (
-                    <div
-                      key={subject.id}
-                      onClick={() => {
-                        setSelectedSubject(subject);
-                        setIsDropdownOpen(false);
-                        setSearchQuery("");
-                      }}
-                      className={`p-2.5 text-left cursor-pointer rounded-lg transition-colors ${
-                        isSelected
-                          ? "bg-[#fff3ed] text-[#d84315] font-bold"
-                          : "bg-white text-stone-800 hover:bg-stone-50"
-                      }`}
-                    >
-                      <p className="text-xs truncate">{subject.displayShort}</p>
-                      <p
-                        className={`text-[10px] font-medium mt-0.5 ${isSelected ? "text-[#d84315]/70" : "text-stone-400"}`}
-                      >
-                        {subject.weeks}
-                      </p>
-                    </div>
-                  );
-                })}
-
-                <div className="border-t border-stone-100 mt-1 pt-1">
-                  <button
-                    onClick={() => {
-                      setIsSubjectModalOpen(true);
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full text-left p-2.5 text-xs font-bold text-[#d84315] hover:bg-stone-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <Plus size={13} />
-                    Add subject
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* เมนูนำทางของอาจารย์ (TEACHER) */}
-          <nav className="px-3 space-y-5">
-            <div>
-              <p className="px-2 text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1.5">
-                Teacher
-              </p>
-              <div className="space-y-0.5">
-                <Link
-                  href="/teacher/sessions"
-                  className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-bold text-[#d84315] bg-[#fff3ed] rounded-lg"
-                >
-                  <CalendarDays size={15} />
-                  Sessions
-                </Link>
-                <Link
-                  href="/teacher/students"
-                  className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors"
-                >
-                  <Users size={15} className="text-stone-400" />
-                  Students
-                </Link>
-                <Link
-                  href="/teacher/materials"
-                  className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors"
-                >
-                  <FileText size={15} className="text-stone-400" />
-                  Materials & prompts
-                </Link>
-                <Link
-                  href="/teacher/subjects"
-                  className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors"
-                >
-                  <Settings size={15} className="text-stone-400" />
-                  Subject settings
-                </Link>
-              </div>
-            </div>
-          </nav>
-        </div>
-
-        {/* โปรไฟล์อาจารย์ */}
-        <div className="p-4 border-t border-stone-100 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-[11px] font-bold text-orange-700">
-              AC
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-bold text-stone-900 leading-tight">
-                Achara Chaiya
-              </p>
-              <p className="text-[10px] text-stone-400 font-medium leading-none">
-                Teacher
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-50 rounded-md transition-colors"
-            title="Log out"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
-      </aside>
+      <TeacherSidebar />
 
       {/* RIGHT MAIN CONTENT */}
       <main

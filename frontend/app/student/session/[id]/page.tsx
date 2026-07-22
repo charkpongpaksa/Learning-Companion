@@ -16,6 +16,7 @@ import {
   Plus
 } from 'lucide-react';
 import { SESSIONS_BY_SUBJECT } from '../../dashboard/data'; // ปรับ path ให้ตรงกับที่เก็บ data.ts
+import StudentSidebar from '@/components/studentsidebar';
 
 // ข้อมูลวิชาสำหรับ Dropdown
 const SUBJECTS = [
@@ -30,7 +31,7 @@ interface Message {
   image?: string;
 }
 
-export default function SessionPage() {
+export default function Page() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params.id as string;
@@ -109,129 +110,7 @@ export default function SessionPage() {
   return (
     <div className="flex min-h-screen bg-[#fdfbf7] text-stone-900 font-sans">
       
-      {/* LEFT SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-stone-200/60 flex flex-col justify-between fixed h-full z-20">
-        <div>
-          {/* Logo */}
-          <div className="p-5 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#e65100]" />
-            <h1 className="text-md font-bold tracking-tight text-stone-950">Learning Companion</h1>
-          </div>
-
-          {/* Subject Selector Dropdown */}
-          <div className="px-3 mb-6 relative">
-            <div 
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center justify-between p-2.5 bg-white border border-stone-200/80 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors select-none"
-            >
-              <div className="text-left min-w-0 flex-1">
-                <p className="text-[13px] font-bold text-stone-900 truncate pr-1">
-                  {selectedSubject.displayShort}
-                </p>
-                <p className="text-[10px] text-stone-400 font-medium">{SUBJECTS.length} subjects</p>
-              </div>
-              <ChevronDown 
-                size={16} 
-                className={`text-stone-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} 
-              />
-            </div>
-
-            {/* Menu List */}
-            {isDropdownOpen && (
-              <div className="absolute left-3 right-3 top-full mt-1.5 bg-white border border-stone-200 shadow-xl rounded-xl z-30 overflow-hidden divide-y divide-stone-100">
-                <div>
-                  {SUBJECTS.map((subject) => {
-                    const isSelected = subject.id === selectedSubject.id;
-                    return (
-                      <div
-                        key={subject.id}
-                        onClick={() => {
-                          setSelectedSubject(subject);
-                          setIsDropdownOpen(false);
-                        }}
-                        className={`p-3 text-left cursor-pointer transition-colors ${
-                          isSelected 
-                            ? 'bg-[#fff3ed] text-[#d84315]' 
-                            : 'bg-white text-stone-900 hover:bg-stone-50'
-                        }`}
-                      >
-                        <p className="text-xs font-bold truncate">
-                          {subject.displayShort}
-                        </p>
-                        <p className={`text-[10px] font-medium mt-0.5 ${
-                          isSelected ? 'text-[#d84315]/70' : 'text-stone-400'
-                        }`}>
-                          {subject.weeks}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* ปุ่ม Add subject ใน Dropdown */}
-                <div 
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    setIsAddSubjectModalOpen(true);
-                  }}
-                  className="p-3 text-left cursor-pointer hover:bg-stone-50 transition-colors flex items-center gap-2 text-[#d84315] font-bold text-xs"
-                >
-                  <Plus size={14} />
-                  <span>Add subject</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Nav Items */}
-          <nav className="px-3 space-y-5 text-left">
-            <div>
-              <p className="px-2 text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1.5">
-                Student
-              </p>
-              <div className="space-y-0.5">
-                <button
-                  suppressHydrationWarning
-                  onClick={() => router.push('/student/dashboard')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[14px] font-bold text-[#d84315] bg-[#fff3ed] rounded-lg text-left cursor-pointer"
-                >
-                  <Layers size={15} />
-                  Sessions
-                </button>
-                <a href="#" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
-                  <FileText size={15} className="text-stone-400" />
-                  Materials
-                </a>
-                <a href="#" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
-                  <TrendingUp size={15} className="text-stone-400" />
-                  My progress
-                </a>
-              </div>
-            </div>
-          </nav>
-        </div>
-
-        {/* Student Profile */}
-        <div className="p-4 border-t border-stone-100 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-[11px] font-bold text-orange-700">
-              SJ
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-bold text-stone-900 leading-tight">Somchai Jaidee</p>
-              <p className="text-[10px] text-stone-400 font-medium leading-none">Student</p>
-            </div>
-          </div>
-          <button
-            suppressHydrationWarning
-            onClick={() => router.push('/login')}
-            className="p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-50 rounded-md transition-colors"
-            title="Log out"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
-      </aside>
+      <StudentSidebar />
 
       {/* RIGHT MAIN CONTENT */}
       <main 
