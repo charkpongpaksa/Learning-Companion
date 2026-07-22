@@ -68,10 +68,23 @@ export async function POST(request: NextRequest) {
   try {
     const teacherId = request.headers.get("x-user-id")
     const body = await request.json()
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
     const { subjectId, title, description, date } = body
+    const sessionDate = new Date(date)
 
     // Validate required fields
-    if (!subjectId || !title || !date) {
+    if (
+      typeof subjectId !== "string" ||
+      typeof title !== "string" ||
+      !title.trim() ||
+      typeof date !== "string" ||
+      Number.isNaN(sessionDate.getTime()) ||
+      (description !== undefined && description !== null && typeof description !== "string")
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -100,9 +113,9 @@ export async function POST(request: NextRequest) {
     const session = await prisma.classSession.create({
       data: {
         subjectId,
-        title,
-        description: description || null,
-        date: new Date(date),
+        title: title.trim(),
+        description: description?.trim() || null,
+        date: sessionDate,
         status: "UPCOMING",
         phase: "BEFORE"
       }

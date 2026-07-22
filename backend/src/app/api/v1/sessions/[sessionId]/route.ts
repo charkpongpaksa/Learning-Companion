@@ -73,7 +73,21 @@ export async function PATCH(
     const teacherId = request.headers.get("x-user-id")
     const { sessionId } = await params
     const body = await request.json()
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid fields" }, { status: 400 })
+    }
+
     const { title, description, date } = body
+    const sessionDate = date !== undefined ? new Date(date) : null
+
+    if (
+      (title !== undefined && (typeof title !== "string" || !title.trim())) ||
+      (description !== undefined && description !== null && typeof description !== "string") ||
+      (date !== undefined && (typeof date !== "string" || Number.isNaN(sessionDate!.getTime())))
+    ) {
+      return NextResponse.json({ error: "Invalid fields" }, { status: 400 })
+    }
 
     // Check session exists
     const existing = await prisma.classSession.findUnique({
@@ -103,9 +117,9 @@ export async function PATCH(
     const session = await prisma.classSession.update({
       where: { id: sessionId },
       data: {
-        title: title || existing.title,
-        description: description !== undefined ? description : existing.description,
-        date: date ? new Date(date) : existing.date
+        title: title !== undefined ? title.trim() : existing.title,
+        description: description !== undefined ? description?.trim() || null : existing.description,
+        date: sessionDate || existing.date
       }
     })
 

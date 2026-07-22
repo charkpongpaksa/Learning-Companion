@@ -10,7 +10,6 @@ const publicRoutes = [
 // Routes that only teachers can access
 const teacherOnlyRoutes = [
   "/api/v1/subjects",
-  "/api/v1/sessions",
   "/api/v1/reports/trigger",
   "/api/v1/reports/session",
   "/api/v1/reports/weekly",
@@ -47,6 +46,24 @@ export function proxy(request: NextRequest) {
     return NextResponse.json(
       { error: "Invalid or expired token" },
       { status: 401 }
+    )
+  }
+
+  const isStudentSessionRead =
+    request.method === "GET" &&
+    /^\/api\/v1\/sessions(?:\/[^/]+)?(?:\/materials)?\/?$/.test(pathname)
+
+  if (pathname.startsWith("/api/v1/sessions") && user.role === "STUDENT" && !isStudentSessionRead) {
+    return NextResponse.json(
+      { error: "Access denied — teachers only" },
+      { status: 403 }
+    )
+  }
+
+  if (pathname.startsWith("/api/v1/sessions") && user.role !== "STUDENT" && user.role !== "TEACHER") {
+    return NextResponse.json(
+      { error: "Access denied" },
+      { status: 403 }
     )
   }
 
