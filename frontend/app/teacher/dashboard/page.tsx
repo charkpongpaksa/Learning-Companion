@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import TeacherSidebar from "@/components/teachersidebar";
-import { useRouter } from "next/navigation";
 import {
   CalendarDays,
   Users,
@@ -47,8 +46,6 @@ type TeacherSession = {
 };
 
 export default function Page() {
-  const router = useRouter();
-
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [selectedSubject, setSelectedSubject] = React.useState<TeacherSubject>(
     TEACHER_SUBJECTS[0] || {
@@ -89,7 +86,9 @@ export default function Page() {
   }, []);
 
   const handleLogout = () => {
-    router.push("/login");
+    if (typeof window !== "undefined") {
+      window.location.assign("/login");
+    }
   };
 
   const handleCreateSession = (e: React.FormEvent) => {
@@ -319,7 +318,9 @@ export default function Page() {
                           <button
                             type="button"
                             onClick={() => {
-                              router.push(`/teacher/session/${session.id}`);
+                              window.location.assign(
+                                `/teacher/session/${session.id}`,
+                              );
                             }}
                             className="w-full py-2 bg-[#fff8f5] border border-orange-200/80 text-[13px] text-[#d84315] font-bold rounded-full flex items-center justify-center gap-1 hover:bg-[#fff3ed] hover:border-orange-300 transition-all active:scale-[0.99] cursor-pointer shadow-sm"
                           >

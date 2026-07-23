@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   CalendarDays,
   FileText,
@@ -56,8 +55,6 @@ const INITIAL_STUDENTS = [
 ];
 
 export default function TeacherStudentsPage() {
-  const router = useRouter();
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,7 +74,9 @@ export default function TeacherStudentsPage() {
   );
 
   const handleLogout = () => {
-    router.push("/login");
+    if (typeof window !== "undefined") {
+      window.location.assign("/login");
+    }
   };
 
   // กรองรายชื่อนักเรียนตามคำค้นหา

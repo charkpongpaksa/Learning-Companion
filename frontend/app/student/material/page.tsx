@@ -1,22 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { 
+import React, { useState } from "react";
+import Link from "next/link";
+import {
   Layers,
   TrendingUp,
-  FileText, 
-  LogOut, 
-  Search, 
+  FileText,
+  LogOut,
+  Search,
   ChevronDown,
   Download,
   Plus,
-  X
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 
-import { SUBJECTS } from '../dashboard/data'; 
-import StudentSidebar from '@/components/studentsidebar';
+import { SUBJECTS } from "../dashboard/data";
+import StudentSidebar from "@/components/studentsidebar";
 
 // ข้อมูลจำลองเอกสารการเรียนตามสัปดาห์
 interface MaterialItem {
@@ -35,63 +34,63 @@ interface WeekGroup {
 
 const initialMaterialsData: WeekGroup[] = [
   {
-    weekTitle: 'Week 3 — EC2 and IAM',
+    weekTitle: "Week 3 — EC2 and IAM",
     items: [
       {
-        id: '1',
-        title: 'IAM Fundamentals — lecture slides',
-        type: 'PDF',
-        size: '2.4 MB',
-        updatedAt: 'updated Mar 14',
-        downloadUrl: '#',
+        id: "1",
+        title: "IAM Fundamentals — lecture slides",
+        type: "PDF",
+        size: "2.4 MB",
+        updatedAt: "updated Mar 14",
+        downloadUrl: "#",
       },
       {
-        id: '2',
-        title: 'AWS Security Best Practices — further reading',
-        type: 'PDF',
-        size: '810 KB',
-        updatedAt: 'updated Mar 13',
-        downloadUrl: '#',
+        id: "2",
+        title: "AWS Security Best Practices — further reading",
+        type: "PDF",
+        size: "810 KB",
+        updatedAt: "updated Mar 13",
+        downloadUrl: "#",
       },
     ],
   },
   {
-    weekTitle: 'Week 2 — S3 and storage tiers',
+    weekTitle: "Week 2 — S3 and storage tiers",
     items: [
       {
-        id: '3',
-        title: 'Object Storage — lecture slides',
-        type: 'PDF',
-        size: '3.1 MB',
-        updatedAt: 'updated Mar 7',
-        downloadUrl: '#',
+        id: "3",
+        title: "Object Storage — lecture slides",
+        type: "PDF",
+        size: "3.1 MB",
+        updatedAt: "updated Mar 7",
+        downloadUrl: "#",
       },
       {
-        id: '4',
-        title: 'S3 Lifecycle — practice worksheet',
-        type: 'DOCX',
-        size: '220 KB',
-        updatedAt: 'updated Mar 6',
-        downloadUrl: '#',
+        id: "4",
+        title: "S3 Lifecycle — practice worksheet",
+        type: "DOCX",
+        size: "220 KB",
+        updatedAt: "updated Mar 6",
+        downloadUrl: "#",
       },
     ],
   },
 ];
 
 export default function StudentMaterials() {
-  const router = useRouter();
-
   // State สำหรับ Sidebar และ Modal Add Subject
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
-  const [subjectCode, setSubjectCode] = useState('');
+  const [subjectCode, setSubjectCode] = useState("");
 
   // State สำหรับ ค้นหา Materials
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = () => {
-    router.push('/login');
+    if (typeof window !== "undefined") {
+      window.location.assign("/login");
+    }
   };
 
   // ฟังก์ชันกดส่งโค้ดวิชา (Add Subject)
@@ -99,14 +98,14 @@ export default function StudentMaterials() {
     e.preventDefault();
     alert(`กำลังเพิ่มวิชาด้วยโค้ด: ${subjectCode}`);
     setIsAddSubjectModalOpen(false);
-    setSubjectCode('');
+    setSubjectCode("");
   };
 
   // Logic สำหรับค้นหาเอกสาร
   const filteredData = initialMaterialsData
     .map((group) => {
       const filteredItems = group.items.filter((item) =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()),
       );
 
       return {
@@ -120,21 +119,23 @@ export default function StudentMaterials() {
 
   return (
     <div className="flex min-h-screen bg-[#fdfbf7] text-stone-900 font-sans">
-      
       <StudentSidebar />
 
       {/* RIGHT MAIN CONTENT */}
-      <main className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden text-left"
+      <main
+        className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden text-left"
         style={{
-          background: 'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)'
+          background:
+            "radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)",
         }}
       >
         <div className="relative z-10 max-w-6xl mx-auto space-y-6">
-          
           {/* Header section */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-stone-900 tracking-tight">Materials</h2>
+              <h2 className="text-2xl font-bold text-stone-900 tracking-tight">
+                Materials
+              </h2>
               <p className="text-xs text-stone-400 mt-1">
                 Files and content from every session in this subject.
               </p>
@@ -143,7 +144,10 @@ export default function StudentMaterials() {
             {/* Search Box */}
             <div className="flex items-center gap-3">
               <div className="relative w-64">
-                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                <Search
+                  size={14}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                />
                 <input
                   type="text"
                   placeholder="Search materials"
@@ -214,10 +218,8 @@ export default function StudentMaterials() {
               </p>
             </div>
           )}
-
         </div>
       </main>
-
     </div>
   );
 }

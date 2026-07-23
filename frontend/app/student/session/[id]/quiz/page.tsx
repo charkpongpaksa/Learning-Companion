@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
-import { 
+import React, { useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import {
   Layers,
   TrendingUp,
-  FileText, 
-  LogOut, 
+  FileText,
+  LogOut,
   ChevronDown,
   ChevronLeft,
-  RotateCcw
-} from 'lucide-react';
+  RotateCcw,
+} from "lucide-react";
 
-import { SUBJECTS } from '../../../dashboard/data';
+import { SUBJECTS } from "../../../dashboard/data";
 
 // ประเภทโจทย์: 'mcq' (ปรนัย), 'boolean' (ถูก/ผิด), 'text' (ข้อเขียน)
-type QuestionType = 'mcq' | 'boolean' | 'text';
+type QuestionType = "mcq" | "boolean" | "text";
 
 interface Question {
   id: number;
@@ -30,44 +30,47 @@ interface Question {
 const QUIZ_QUESTIONS: Question[] = [
   {
     id: 1,
-    type: 'mcq',
-    topic: 'IAM ROLES',
-    question: 'Which AWS mechanism lets an EC2 instance securely obtain temporary permissions without storing access keys on the instance?',
+    type: "mcq",
+    topic: "IAM ROLES",
+    question:
+      "Which AWS mechanism lets an EC2 instance securely obtain temporary permissions without storing access keys on the instance?",
     options: [
-      'An IAM role attached to the instance profile',
+      "An IAM role attached to the instance profile",
       "An IAM user's access key pair saved in a config file",
-      'A security group inbound rule',
-      'A hardcoded secret in the application code',
+      "A security group inbound rule",
+      "A hardcoded secret in the application code",
     ],
   },
   {
     id: 2,
-    type: 'boolean',
-    topic: 'AWS SECURITY',
-    question: 'By default, all inbound traffic to a newly created Security Group in AWS is allowed.',
+    type: "boolean",
+    topic: "AWS SECURITY",
+    question:
+      "By default, all inbound traffic to a newly created Security Group in AWS is allowed.",
   },
   {
     id: 3,
-    type: 'text',
-    topic: 'EC2 COMPUTING',
-    question: 'Briefly explain the primary difference between On-Demand and Spot EC2 instances.',
+    type: "text",
+    topic: "EC2 COMPUTING",
+    question:
+      "Briefly explain the primary difference between On-Demand and Spot EC2 instances.",
   },
   {
     id: 4,
-    type: 'mcq',
-    topic: 'EC2 BASICS',
-    question: 'Which EC2 pricing option offers the highest discount for long-term committed workloads?',
+    type: "mcq",
+    topic: "EC2 BASICS",
+    question:
+      "Which EC2 pricing option offers the highest discount for long-term committed workloads?",
     options: [
-      'On-Demand Instances',
-      'Reserved Instances / Savings Plans',
-      'Spot Instances',
-      'Dedicated Hosts',
+      "On-Demand Instances",
+      "Reserved Instances / Savings Plans",
+      "Spot Instances",
+      "Dedicated Hosts",
     ],
   },
 ];
 
 export default function ReadinessQuizPage() {
-  const router = useRouter();
   const params = useParams();
   const sessionId = params.id;
 
@@ -80,16 +83,20 @@ export default function ReadinessQuizPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // เก็บคำตอบรองรับทั้ง Index (ข้อเลือก/ถูกผิด) และ String (ข้อเขียน)
-  const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number | string }>({});
+  const [selectedAnswers, setSelectedAnswers] = useState<{
+    [key: number]: number | string;
+  }>({});
 
   const totalQuestions = QUIZ_QUESTIONS.length;
   const currentQ = QUIZ_QUESTIONS[currentQuestionIdx];
   const answeredCount = Object.keys(selectedAnswers).filter(
-    (key) => String(selectedAnswers[Number(key)]).trim() !== ''
+    (key) => String(selectedAnswers[Number(key)]).trim() !== "",
   ).length;
 
   const handleLogout = () => {
-    router.push('/login');
+    if (typeof window !== "undefined") {
+      window.location.assign("/login");
+    }
   };
 
   // บันทึกคำตอบ (สำหรับ MCQ / Boolean)
@@ -120,7 +127,7 @@ export default function ReadinessQuizPage() {
     if (currentQuestionIdx > 0) {
       setCurrentQuestionIdx((prev) => prev - 1);
     } else {
-      router.back();
+      window.history.back();
     }
   };
 
@@ -133,25 +140,38 @@ export default function ReadinessQuizPage() {
   // ฟังก์ชันแปลงรูปแบบประเภทโจทย์แสดงผลใน Quiz Results
   const renderTypeBadge = (type: QuestionType) => {
     switch (type) {
-      case 'mcq':
-        return <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-purple-100 text-purple-700">Multiple Choice</span>;
-      case 'boolean':
-        return <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-blue-100 text-blue-700">True / False</span>;
-      case 'text':
-        return <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-amber-100 text-amber-700">Short Answer</span>;
+      case "mcq":
+        return (
+          <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-purple-100 text-purple-700">
+            Multiple Choice
+          </span>
+        );
+      case "boolean":
+        return (
+          <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-blue-100 text-blue-700">
+            True / False
+          </span>
+        );
+      case "text":
+        return (
+          <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-amber-100 text-amber-700">
+            Short Answer
+          </span>
+        );
     }
   };
 
   // ดึงคำตอบของข้อนั้นๆ มาแปลงเป็น ข้อความอ่านง่าย
   const getFormattedAnswer = (q: Question, idx: number) => {
     const rawAns = selectedAnswers[idx];
-    if (rawAns === undefined || String(rawAns).trim() === '') return '- Not Answered -';
+    if (rawAns === undefined || String(rawAns).trim() === "")
+      return "- Not Answered -";
 
-    if (q.type === 'mcq' && q.options) {
+    if (q.type === "mcq" && q.options) {
       return q.options[Number(rawAns)] || String(rawAns);
     }
-    if (q.type === 'boolean') {
-      return rawAns === 'true' ? 'True' : 'False';
+    if (q.type === "boolean") {
+      return rawAns === "true" ? "True" : "False";
     }
     return String(rawAns);
   };
@@ -159,22 +179,23 @@ export default function ReadinessQuizPage() {
   // ตรวจสอบว่าข้อปัจจุบันตอบหรือยัง
   const currentAnswer = selectedAnswers[currentQuestionIdx];
   const isOptionSelected =
-    currentAnswer !== undefined && String(currentAnswer).trim() !== '';
+    currentAnswer !== undefined && String(currentAnswer).trim() !== "";
 
   return (
     <div className="flex min-h-screen bg-[#fdfbf7] text-stone-900 font-sans">
-      
       {/* ================= 1. LEFT SIDEBAR ================= */}
       <aside className="w-64 bg-white border-r border-stone-200/60 flex flex-col justify-between fixed h-full z-20">
         <div>
           <div className="p-5 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#e65100]" />
-            <h1 className="text-md font-bold tracking-tight text-stone-950">Learning Companion</h1>
+            <h1 className="text-md font-bold tracking-tight text-stone-950">
+              Learning Companion
+            </h1>
           </div>
 
           {/* Dropdown วิชา */}
           <div className="px-3 mb-6 relative">
-            <div 
+            <div
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center justify-between p-2.5 bg-white border border-stone-200/80 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors select-none"
             >
@@ -182,11 +203,13 @@ export default function ReadinessQuizPage() {
                 <p className="text-[13px] font-bold text-stone-900 truncate pr-1">
                   {selectedSubject.displayShort}
                 </p>
-                <p className="text-[10px] text-stone-400 font-medium">{SUBJECTS.length} subjects</p>
+                <p className="text-[10px] text-stone-400 font-medium">
+                  {SUBJECTS.length} subjects
+                </p>
               </div>
-              <ChevronDown 
-                size={16} 
-                className={`text-stone-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+              <ChevronDown
+                size={16}
+                className={`text-stone-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? "rotate-180" : ""}`}
               />
             </div>
 
@@ -203,17 +226,19 @@ export default function ReadinessQuizPage() {
                           setIsDropdownOpen(false);
                         }}
                         className={`p-3 text-left cursor-pointer transition-colors ${
-                          isSelected 
-                            ? 'bg-[#fff3ed] text-[#d84315]' 
-                            : 'bg-white text-stone-900 hover:bg-stone-50'
+                          isSelected
+                            ? "bg-[#fff3ed] text-[#d84315]"
+                            : "bg-white text-stone-900 hover:bg-stone-50"
                         }`}
                       >
                         <p className="text-xs font-bold truncate">
                           {subject.displayShort}
                         </p>
-                        <p className={`text-[10px] font-medium mt-0.5 ${
-                          isSelected ? 'text-[#d84315]/70' : 'text-stone-400'
-                        }`}>
+                        <p
+                          className={`text-[10px] font-medium mt-0.5 ${
+                            isSelected ? "text-[#d84315]/70" : "text-stone-400"
+                          }`}
+                        >
                           {subject.weeks}
                         </p>
                       </div>
@@ -230,15 +255,24 @@ export default function ReadinessQuizPage() {
                 Student
               </p>
               <div className="space-y-0.5">
-                <Link href="/student/dashboard" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-bold text-[#d84315] bg-[#fff3ed] rounded-lg">
+                <Link
+                  href="/student/dashboard"
+                  className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-bold text-[#d84315] bg-[#fff3ed] rounded-lg"
+                >
                   <Layers size={15} />
                   Sessions
                 </Link>
-                <Link href="/student/material" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
+                <Link
+                  href="/student/material"
+                  className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors"
+                >
                   <FileText size={15} className="text-stone-400" />
                   Materials
                 </Link>
-                <Link href="/student/progress" className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors">
+                <Link
+                  href="/student/progress"
+                  className="flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-lg transition-colors"
+                >
                   <TrendingUp size={15} className="text-stone-400" />
                   My progress
                 </Link>
@@ -253,11 +287,15 @@ export default function ReadinessQuizPage() {
               SJ
             </div>
             <div className="text-left">
-              <p className="text-xs font-bold text-stone-900 leading-tight">Somchai Jaidee</p>
-              <p className="text-[10px] text-stone-400 font-medium leading-none">Student</p>
+              <p className="text-xs font-bold text-stone-900 leading-tight">
+                Somchai Jaidee
+              </p>
+              <p className="text-[10px] text-stone-400 font-medium leading-none">
+                Student
+              </p>
             </div>
           </div>
-          <button 
+          <button
             onClick={handleLogout}
             className="p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-50 rounded-md transition-colors"
             title="Log out"
@@ -268,16 +306,17 @@ export default function ReadinessQuizPage() {
       </aside>
 
       {/* ================= 2. MAIN CONTENT ================= */}
-      <main className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden text-left"
+      <main
+        className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden text-left"
         style={{
-          background: 'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)'
+          background:
+            "radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)",
         }}
       >
         <div className="relative z-10 max-w-6xl mx-auto space-y-3">
-          
           {/* Back Breadcrumb Link */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <Link 
+            <Link
               href={`/student/session/${sessionId}`}
               className="inline-flex items-center gap-1 text-xs font-medium text-stone-400 hover:text-stone-700 transition-colors"
             >
@@ -287,12 +326,13 @@ export default function ReadinessQuizPage() {
           </div>
 
           {!isSubmitted ? (
-
             /* ================= VIEW A: QUIZ QUESTION FORM ================= */
             <div className="space-y-2">
               {/* Title Header */}
               <div>
-                <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Readiness quiz</h1>
+                <h1 className="text-2xl font-bold text-stone-900 tracking-tight">
+                  Readiness quiz
+                </h1>
                 <p className="text-xs text-stone-400 mt-1">
                   {totalQuestions} short questions based on tonight's chat.
                 </p>
@@ -300,28 +340,29 @@ export default function ReadinessQuizPage() {
 
               {/* QUIZ CARD CONTAINER */}
               <div className="bg-white border border-stone-200/70 rounded-3xl p-8 shadow-sm space-y-8">
-                
                 {/* 1. Progress Steps Bar */}
                 <div className="space-y-2">
-                  <div 
+                  <div
                     className="grid gap-2"
-                    style={{ gridTemplateColumns: `repeat(${totalQuestions}, minmax(0, 1fr))` }}
+                    style={{
+                      gridTemplateColumns: `repeat(${totalQuestions}, minmax(0, 1fr))`,
+                    }}
                   >
                     {Array.from({ length: totalQuestions }).map((_, idx) => {
                       const isCurrent = idx === currentQuestionIdx;
                       const isAnswered =
                         selectedAnswers[idx] !== undefined &&
-                        String(selectedAnswers[idx]).trim() !== '';
+                        String(selectedAnswers[idx]).trim() !== "";
 
                       return (
                         <div
                           key={idx}
                           className={`h-1.5 rounded-full transition-all duration-300 ${
                             isCurrent
-                              ? 'bg-[#e65100]'
+                              ? "bg-[#e65100]"
                               : isAnswered
-                              ? 'bg-orange-300'
-                              : 'bg-stone-100'
+                                ? "bg-orange-300"
+                                : "bg-stone-100"
                           }`}
                         />
                       );
@@ -337,7 +378,8 @@ export default function ReadinessQuizPage() {
                 {/* 2. Question Topic & Label */}
                 <div>
                   <p className="text-[11px] font-bold text-[#e65100] tracking-wider uppercase mb-2">
-                    {currentQ.topic} · QUESTION {currentQuestionIdx + 1} OF {totalQuestions}
+                    {currentQ.topic} · QUESTION {currentQuestionIdx + 1} OF{" "}
+                    {totalQuestions}
                   </p>
                   <h2 className="text-lg font-bold text-stone-900 leading-snug">
                     {currentQ.question}
@@ -346,11 +388,12 @@ export default function ReadinessQuizPage() {
 
                 {/* 3. Dynamic Question Components */}
                 <div className="space-y-3 pt-2">
-                  
                   {/* --- TYPE 1: MULTIPLE CHOICE (MCQ) --- */}
-                  {currentQ.type === 'mcq' && currentQ.options && (
+                  {currentQ.type === "mcq" &&
+                    currentQ.options &&
                     currentQ.options.map((option, idx) => {
-                      const isSelected = selectedAnswers[currentQuestionIdx] === idx;
+                      const isSelected =
+                        selectedAnswers[currentQuestionIdx] === idx;
 
                       return (
                         <div
@@ -358,33 +401,43 @@ export default function ReadinessQuizPage() {
                           onClick={() => handleSelectOption(idx)}
                           className={`flex items-center gap-3.5 p-4 rounded-2xl border transition-all cursor-pointer select-none ${
                             isSelected
-                              ? 'border-[#e65100] bg-[#fffaf7] shadow-sm'
-                              : 'border-stone-200 bg-white hover:bg-stone-50/80'
+                              ? "border-[#e65100] bg-[#fffaf7] shadow-sm"
+                              : "border-stone-200 bg-white hover:bg-stone-50/80"
                           }`}
                         >
-                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                            isSelected ? 'border-[#e65100] bg-white' : 'border-stone-300'
-                          }`}>
-                            {isSelected && <div className="w-2 h-2 rounded-full bg-[#e65100]" />}
+                          <div
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                              isSelected
+                                ? "border-[#e65100] bg-white"
+                                : "border-stone-300"
+                            }`}
+                          >
+                            {isSelected && (
+                              <div className="w-2 h-2 rounded-full bg-[#e65100]" />
+                            )}
                           </div>
-                          <span className={`text-xs font-medium ${
-                            isSelected ? 'text-stone-950 font-semibold' : 'text-stone-700'
-                          }`}>
+                          <span
+                            className={`text-xs font-medium ${
+                              isSelected
+                                ? "text-stone-950 font-semibold"
+                                : "text-stone-700"
+                            }`}
+                          >
                             {option}
                           </span>
                         </div>
                       );
-                    })
-                  )}
+                    })}
 
                   {/* --- TYPE 2: TRUE / FALSE (BOOLEAN) --- */}
-                  {currentQ.type === 'boolean' && (
+                  {currentQ.type === "boolean" && (
                     <div className="grid grid-cols-2 gap-4">
                       {[
-                        { label: 'True', value: 'true' },
-                        { label: 'False', value: 'false' },
+                        { label: "True", value: "true" },
+                        { label: "False", value: "false" },
                       ].map((item) => {
-                        const isSelected = selectedAnswers[currentQuestionIdx] === item.value;
+                        const isSelected =
+                          selectedAnswers[currentQuestionIdx] === item.value;
 
                         return (
                           <div
@@ -392,16 +445,24 @@ export default function ReadinessQuizPage() {
                             onClick={() => handleSelectOption(item.value)}
                             className={`flex items-center justify-center gap-3 p-5 rounded-2xl border text-center transition-all cursor-pointer select-none ${
                               isSelected
-                                ? 'border-[#e65100] bg-[#fffaf7] shadow-sm font-bold text-[#e65100]'
-                                : 'border-stone-200 bg-white hover:bg-stone-50/80 text-stone-700'
+                                ? "border-[#e65100] bg-[#fffaf7] shadow-sm font-bold text-[#e65100]"
+                                : "border-stone-200 bg-white hover:bg-stone-50/80 text-stone-700"
                             }`}
                           >
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                              isSelected ? 'border-[#e65100] bg-white' : 'border-stone-300'
-                            }`}>
-                              {isSelected && <div className="w-2 h-2 rounded-full bg-[#e65100]" />}
+                            <div
+                              className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                                isSelected
+                                  ? "border-[#e65100] bg-white"
+                                  : "border-stone-300"
+                              }`}
+                            >
+                              {isSelected && (
+                                <div className="w-2 h-2 rounded-full bg-[#e65100]" />
+                              )}
                             </div>
-                            <span className="text-sm font-semibold">{item.label}</span>
+                            <span className="text-sm font-semibold">
+                              {item.label}
+                            </span>
                           </div>
                         );
                       })}
@@ -409,12 +470,14 @@ export default function ReadinessQuizPage() {
                   )}
 
                   {/* --- TYPE 3: SHORT ANSWER (TEXT) --- */}
-                  {currentQ.type === 'text' && (
+                  {currentQ.type === "text" && (
                     <div className="space-y-2">
                       <textarea
                         rows={4}
                         placeholder="Type your answer here..."
-                        value={(selectedAnswers[currentQuestionIdx] as string) || ''}
+                        value={
+                          (selectedAnswers[currentQuestionIdx] as string) || ""
+                        }
                         onChange={(e) => handleTextChange(e.target.value)}
                         className="w-full p-4 border border-stone-200 rounded-2xl text-xs font-medium placeholder:text-stone-300 focus:outline-none focus:border-[#e65100] focus:ring-1 focus:ring-[#e65100] transition-all bg-stone-50/30"
                       />
@@ -423,7 +486,6 @@ export default function ReadinessQuizPage() {
                       </p>
                     </div>
                   )}
-
                 </div>
 
                 {/* 4. Action Buttons (Back & Next Question) */}
@@ -442,30 +504,32 @@ export default function ReadinessQuizPage() {
                     disabled={!isOptionSelected}
                     className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all shadow-sm ${
                       isOptionSelected
-                        ? 'bg-[#e65100] hover:bg-[#d84315] text-white cursor-pointer active:scale-[0.98]'
-                        : 'bg-stone-200 text-stone-400 cursor-not-allowed opacity-70'
+                        ? "bg-[#e65100] hover:bg-[#d84315] text-white cursor-pointer active:scale-[0.98]"
+                        : "bg-stone-200 text-stone-400 cursor-not-allowed opacity-70"
                     }`}
                   >
-                    {currentQuestionIdx === totalQuestions - 1 ? 'Submit' : 'Next question'}
+                    {currentQuestionIdx === totalQuestions - 1
+                      ? "Submit"
+                      : "Next question"}
                   </button>
                 </div>
-
               </div>
             </div>
-
           ) : (
-
             /* ================= VIEW B: QUIZ RESULTS ================= */
             <div className="space-y-6">
-              
               {/* Header Title + Action Button */}
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-2xl font-bold text-stone-950 tracking-tight">Quiz results</h2>
-                  <p className="text-xs text-stone-500 mt-1">Here is your summary breakdown before class.</p>
+                  <h2 className="text-2xl font-bold text-stone-950 tracking-tight">
+                    Quiz results
+                  </h2>
+                  <p className="text-xs text-stone-500 mt-1">
+                    Here is your summary breakdown before class.
+                  </p>
                 </div>
 
-                <button 
+                <button
                   onClick={handleRetakeQuiz}
                   className="inline-flex items-center gap-1.5 border border-stone-300 bg-white hover:bg-stone-50 px-4 py-2 rounded-full text-xs font-semibold text-stone-700 transition-colors shadow-xs cursor-pointer active:scale-[0.98]"
                 >
@@ -496,8 +560,12 @@ export default function ReadinessQuizPage() {
                     />
                   </svg>
                   <div className="absolute flex flex-col items-center justify-center text-center">
-                    <span className="text-2xl font-extrabold text-stone-900 tracking-tight">85</span>
-                    <span className="text-[10px] font-medium text-stone-400">/ 100</span>
+                    <span className="text-2xl font-extrabold text-stone-900 tracking-tight">
+                      85
+                    </span>
+                    <span className="text-[10px] font-medium text-stone-400">
+                      / 100
+                    </span>
                   </div>
                 </div>
 
@@ -505,25 +573,34 @@ export default function ReadinessQuizPage() {
                   <span className="inline-block px-2.5 py-0.5 bg-orange-100/80 text-[#e65100] text-[11px] font-bold rounded-full">
                     Completed
                   </span>
-                  <h3 className="text-base font-bold text-stone-900">Good job on completing the quiz!</h3>
+                  <h3 className="text-base font-bold text-stone-900">
+                    Good job on completing the quiz!
+                  </h3>
                   <p className="text-xs text-stone-500 leading-relaxed max-w-xl">
-                    You've answered all {totalQuestions} questions. Review your submitted answers grouped by question type below.
+                    You've answered all {totalQuestions} questions. Review your
+                    submitted answers grouped by question type below.
                   </p>
                 </div>
               </div>
 
               {/* Question Breakdown by Question Type */}
               <div className="bg-white border border-stone-200/60 rounded-3xl p-6 shadow-sm space-y-4">
-                <h3 className="text-sm font-bold text-stone-900">Question breakdown</h3>
+                <h3 className="text-sm font-bold text-stone-900">
+                  Question breakdown
+                </h3>
 
                 <div className="space-y-3">
                   {QUIZ_QUESTIONS.map((q, idx) => (
-                    <div key={q.id} className="p-4 bg-stone-50/80 rounded-2xl border border-stone-100 space-y-2.5">
-                      
+                    <div
+                      key={q.id}
+                      className="p-4 bg-stone-50/80 rounded-2xl border border-stone-100 space-y-2.5"
+                    >
                       {/* Top Header Row */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-stone-400">Q{idx + 1}</span>
+                          <span className="text-xs font-bold text-stone-400">
+                            Q{idx + 1}
+                          </span>
                           {renderTypeBadge(q.type)}
                         </div>
                         <span className="text-[11px] font-semibold text-[#e65100] uppercase tracking-wider">
@@ -543,19 +620,14 @@ export default function ReadinessQuizPage() {
                         </span>
                         {getFormattedAnswer(q, idx)}
                       </div>
-
                     </div>
                   ))}
                 </div>
-
               </div>
-
             </div>
           )}
-
         </div>
       </main>
-
     </div>
   );
 }

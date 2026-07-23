@@ -1,48 +1,49 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-
-import { useRouter } from 'next/navigation';
-import { 
+import React, { useState } from "react";
+import Link from "next/link";
+import {
   Layers,
   TrendingUp,
-  FileText, 
-  LogOut, 
-  Search, 
-  Plus, 
-  Calendar, 
-  Clock, 
+  FileText,
+  LogOut,
+  Search,
+  Plus,
+  Calendar,
+  Clock,
   ChevronDown,
-  X 
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 
-import { SUBJECTS, SESSIONS_BY_SUBJECT } from './data';
-import StudentSidebar from '@/components/studentsidebar';
+import { SUBJECTS, SESSIONS_BY_SUBJECT } from "./data";
+import StudentSidebar from "@/components/studentsidebar";
 
 export default function Studentsidebar() {
-  const router = useRouter();
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // State สำหรับ Modal "Add a subject" (ตามรูปที่ 2)
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
-  const [subjectCode, setSubjectCode] = useState('');
+  const [subjectCode, setSubjectCode] = useState("");
 
   const handleLogout = () => {
-    router.push('/login');
+    if (typeof window !== "undefined") {
+      window.location.assign("/login");
+    }
   };
 
   const handleAddSubjectSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert(`กำลังเพิ่มวิชาด้วยโค้ด: ${subjectCode}`);
     setIsAddSubjectModalOpen(false);
-    setSubjectCode('');
+    setSubjectCode("");
   };
 
-  const currentSessions = SESSIONS_BY_SUBJECT[selectedSubject.code as keyof typeof SESSIONS_BY_SUBJECT] || [];
+  const currentSessions =
+    SESSIONS_BY_SUBJECT[
+      selectedSubject.code as keyof typeof SESSIONS_BY_SUBJECT
+    ] || [];
 
   const filteredSessions = currentSessions.filter((session) => {
     const query = searchQuery.toLowerCase().trim();
@@ -58,28 +59,34 @@ export default function Studentsidebar() {
       <StudentSidebar />
 
       {/* RIGHT MAIN CONTENT */}
-      <main 
+      <main
         className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden text-left"
         style={{
-          background: 'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)'
+          background:
+            "radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)",
         }}
       >
         <div className="relative z-10 max-w-6xl mx-auto space-y-6">
-          
           {/* Header Area */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-stone-900 tracking-tight">Your sessions</h2>
+              <h2 className="text-2xl font-bold text-stone-900 tracking-tight">
+                Your sessions
+              </h2>
               <p className="text-xs text-stone-400 mt-1">
-                {selectedSubject.code} - {selectedSubject.name} — prepare before class, catch up if you missed something.
+                {selectedSubject.code} - {selectedSubject.name} — prepare before
+                class, catch up if you missed something.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="relative w-64">
-                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                <Search
+                  size={14}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                />
                 <input
-                suppressHydrationWarning
+                  suppressHydrationWarning
                   type="text"
                   placeholder="Search sessions"
                   value={searchQuery}
@@ -94,21 +101,22 @@ export default function Studentsidebar() {
           {filteredSessions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredSessions.map((session) => {
-                const isActive = session.status === 'Active';
+                const isActive = session.status === "Active";
 
                 return (
-                  <div 
+                  <div
                     key={session.id}
                     onClick={() => {
-                      if (isActive) {
-                        router.push(`/student/session/${session.id}`);
+                      if (isActive && typeof window !== "undefined") {
+                        window.location.assign(
+                          `/student/session/${session.id}`,
+                        );
                       }
                     }}
-                    
                     className={`bg-white border border-stone-200/60 rounded-xl p-5 flex flex-col justify-between min-h-[170px] shadow-sm transition-all ${
-                      isActive 
-                        ? 'cursor-pointer hover:shadow-md hover:border-orange-300' 
-                        : 'cursor-default'
+                      isActive
+                        ? "cursor-pointer hover:shadow-md hover:border-orange-300"
+                        : "cursor-default"
                     }`}
                   >
                     <div>
@@ -116,18 +124,18 @@ export default function Studentsidebar() {
                         <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
                           {session.week}
                         </span>
-                        
-                        {session.status === 'Completed' && (
+
+                        {session.status === "Completed" && (
                           <span className="px-2.5 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-semibold border border-green-100">
                             Completed
                           </span>
                         )}
-                        {session.status === 'Active' && (
+                        {session.status === "Active" && (
                           <span className="px-2.5 py-0.5 bg-[#fff3ed] text-[#d84315] rounded-full text-[10px] font-bold border border-orange-100">
                             Active
                           </span>
                         )}
-                        {session.status === 'Upcoming' && (
+                        {session.status === "Upcoming" && (
                           <span className="px-2.5 py-0.5 bg-white text-stone-400 border border-stone-200 rounded-full text-[10px] font-semibold">
                             Upcoming
                           </span>
@@ -149,22 +157,28 @@ export default function Studentsidebar() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock size={13} className="text-stone-300" />
-                        <span className={session.status === 'Active' ? 'text-stone-500 font-semibold' : ''}>
+                        <span
+                          className={
+                            session.status === "Active"
+                              ? "text-stone-500 font-semibold"
+                              : ""
+                          }
+                        >
                           {session.info}
                         </span>
                       </div>
                     </div>
-
                   </div>
                 );
               })}
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-xl border border-stone-200/50">
-              <p className="text-sm text-stone-400 font-medium">No sessions found matching "{searchQuery}"</p>
+              <p className="text-sm text-stone-400 font-medium">
+                No sessions found matching "{searchQuery}"
+              </p>
             </div>
           )}
-
         </div>
       </main>
 
@@ -176,8 +190,11 @@ export default function Studentsidebar() {
               <h3 className="text-[20px] font-bold text-stone-950 tracking-tight">
                 Add a subject
               </h3>
-              <button 
-                onClick={() => { setIsAddSubjectModalOpen(false); setSubjectCode(''); }}
+              <button
+                onClick={() => {
+                  setIsAddSubjectModalOpen(false);
+                  setSubjectCode("");
+                }}
                 className="text-stone-400 hover:text-stone-600 transition-colors p-1 rounded-md cursor-pointer"
               >
                 <X size={18} />
@@ -201,7 +218,10 @@ export default function Studentsidebar() {
               <div className="flex justify-end gap-2.5 pt-1">
                 <button
                   type="button"
-                  onClick={() => { setIsAddSubjectModalOpen(false); setSubjectCode(''); }}
+                  onClick={() => {
+                    setIsAddSubjectModalOpen(false);
+                    setSubjectCode("");
+                  }}
                   className="px-5 py-2 border border-stone-950 text-stone-950 font-bold text-[13px] rounded-full hover:bg-stone-50 transition-all active:scale-[0.97] cursor-pointer"
                 >
                   Cancel
@@ -217,7 +237,6 @@ export default function Studentsidebar() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

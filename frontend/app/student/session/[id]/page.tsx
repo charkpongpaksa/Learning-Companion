@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   Layers,
   FileText,
@@ -27,7 +27,6 @@ interface Message {
 
 export default function Page() {
   const params = useParams();
-  const router = useRouter();
   const sessionId = params.id as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -116,7 +115,7 @@ export default function Page() {
           <div>
             <button
               suppressHydrationWarning
-              onClick={() => router.back()}
+              onClick={() => window.history.back()}
               className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-stone-800 mb-3 transition-colors cursor-pointer"
             >
               <ChevronLeft size={16} /> Your sessions
@@ -134,8 +133,8 @@ export default function Page() {
               <button
                 suppressHydrationWarning
                 onClick={() =>
-                  router.push(`/student/session/${sessionId}/quiz`)
-                } // 👈 เปลี่ยน Path ตามโครงสร้างโฟลเดอร์ Quiz ของน้องได้เลยครับ
+                  window.location.assign(`/student/session/${sessionId}/quiz`)
+                }
                 className="self-start md:self-auto px-6 py-4 bg-[#e65100] hover:bg-[#d84315] text-white text-[13px] font-bold rounded-full shadow-sm hover:shadow transition-all active:scale-95 cursor-pointer flex-shrink-0"
               >
                 Take readiness quiz

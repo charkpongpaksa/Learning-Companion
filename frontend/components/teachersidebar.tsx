@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/components/auth-provider";
 import {
   CalendarDays,
   Users,
@@ -36,6 +37,7 @@ type TeacherSubject = {
 export default function TeacherSidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<TeacherSubject>(
@@ -53,7 +55,7 @@ export default function TeacherSidebar() {
         sessionsRun: 0,
         studentsCaughtUp: "0/0",
       },
-    }
+    },
   );
 
   // State สำหรับกล่อง Add Subject
@@ -62,14 +64,14 @@ export default function TeacherSidebar() {
   const [subjectCode, setSubjectCode] = useState("");
 
   const handleLogout = () => {
-    router.push("/login");
+    logout();
   };
 
   // ฟังก์ชันจัดการเมื่อกดเซฟสร้างวิชาใหม่
   const handleCreateSubject = (e: React.FormEvent) => {
     e.preventDefault();
     alert(
-      `สร้างวิชาใหม่สำเร็จ!\nชื่อวิชา: ${subjectName}\nรหัสวิชา: ${subjectCode}`
+      `สร้างวิชาใหม่สำเร็จ!\nชื่อวิชา: ${subjectName}\nรหัสวิชา: ${subjectCode}`,
     );
     setIsSubjectModalOpen(false);
     setSubjectName("");
