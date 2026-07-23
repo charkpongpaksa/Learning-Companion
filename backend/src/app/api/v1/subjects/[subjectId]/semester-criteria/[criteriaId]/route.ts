@@ -10,7 +10,21 @@ export async function PATCH(
     const teacherId = request.headers.get("x-user-id")
     const { subjectId, criteriaId } = await params
     const body = await request.json()
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid fields" }, { status: 400 })
+    }
+
     const { description, goal, order } = body
+
+    if (
+      (description === undefined && goal === undefined && order === undefined) ||
+      (description !== undefined && (typeof description !== "string" || !description.trim())) ||
+      (goal !== undefined && (typeof goal !== "string" || !goal.trim())) ||
+      (order !== undefined && (!Number.isInteger(order) || order < 0))
+    ) {
+      return NextResponse.json({ error: "Invalid fields" }, { status: 400 })
+    }
 
     // Check subject exists and teacher owns it
     const subject = await prisma.subject.findUnique({
@@ -53,8 +67,8 @@ export async function PATCH(
     const criteria = await prisma.semesterCriteria.update({
       where: { id: criteriaId },
       data: {
-        description: description || existing.description,
-        goal: goal || existing.goal,
+        description: description !== undefined ? description.trim() : existing.description,
+        goal: goal !== undefined ? goal.trim() : existing.goal,
         order: order !== undefined ? order : existing.order
       }
     })
