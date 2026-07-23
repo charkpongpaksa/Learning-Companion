@@ -79,6 +79,7 @@ export default function Studentsidebar() {
               <div className="relative w-64">
                 <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
                 <input
+                suppressHydrationWarning
                   type="text"
                   placeholder="Search sessions"
                   value={searchQuery}

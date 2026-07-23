@@ -7,14 +7,7 @@ export const SUBJECTS = [
     name: 'Basic Cloud Computing',
     displayShort: 'CS332 · Basic Cloud Computing',
     weeks: '4 weeks',
-  },
-  {
-    id: 2,
-    code: 'CS242',
-    name: 'Systems Programming',
-    displayShort: 'CS242 · Systems Programming',
-    weeks: '3 weeks',
-  },
+  }
 ];
 
 export const SESSIONS_BY_SUBJECT = {
@@ -55,34 +48,5 @@ export const SESSIONS_BY_SUBJECT = {
       date: 'Mar 22',
       info: 'Not started',
     },
-  ],
-  CS242: [
-    {
-      id: 5,
-      week: 'Week 1',
-      title: 'Process management',
-      description: 'fork, exec, and wait system calls',
-      status: 'Completed',
-      date: 'Mar 1',
-      info: 'Readiness 88%',
-    },
-    {
-      id: 6,
-      week: 'Week 2',
-      title: 'Pthreads and synchronization',
-      description: 'Mutex locking and deadlock prevention in C',
-      status: 'Active',
-      date: 'Mar 8',
-      info: 'Before class',
-    },
-    {
-      id: 7,
-      week: 'Week 3',
-      title: 'Memory management',
-      description: 'Virtual memory and paging',
-      status: 'Upcoming',
-      date: 'Mar 15',
-      info: 'Not started',
-    },
-  ],
+  ]
 };

@@ -193,6 +193,7 @@ export default function StudentSidebar({
             </div>
           </div>
           <button 
+          suppressHydrationWarning
             onClick={handleLogout}
             className="p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-50 rounded-md transition-colors cursor-pointer"
             title="Log out"
