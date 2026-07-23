@@ -131,6 +131,15 @@
     @apply font-sans;
     }
 }
-html {
-  overflow-y: scroll;
+
+/* ซ่อน Scrollbar ของหน้าเว็บทั้งหมด แต่ยังคงเลื่อน (Scroll) ได้ตามปกติ */
+html, body {
+  overflow-y: scroll; /* บังคับจองพื้นที่ไว้ หรือล็อคแกนไว้ */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
