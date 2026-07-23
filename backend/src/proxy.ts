@@ -67,6 +67,13 @@ export function proxy(request: NextRequest) {
     )
   }
 
+  if (pathname.startsWith("/api/v1/reports/student") && user.role !== "STUDENT" && user.role !== "TEACHER") {
+    return NextResponse.json(
+      { error: "Access denied" },
+      { status: 403 }
+    )
+  }
+
   // Check teacher only routes
   if (teacherOnlyRoutes.some((route) => pathname.startsWith(route))) {
     if (user.role !== "TEACHER") {

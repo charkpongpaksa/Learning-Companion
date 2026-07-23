@@ -95,3 +95,14 @@ export const callAIInsight = async (payload: {
   // Mock response while AI teammate isn't ready.
   return { insight: "Mock insight for testing" }
 }
+
+export const callAIWeeklySummary = async (payload: {
+  subjectName: string
+  weekNumber: number
+  avgReadiness: number
+  semesterProgress: number
+}) => {
+  return {
+    summary: `Mock weekly summary for ${payload.subjectName}, week ${payload.weekNumber}: average readiness is ${payload.avgReadiness.toFixed(1)}%.`
+  }
+}
