@@ -47,6 +47,44 @@ export const callAIImageAnalysis = async (payload: {
   }
 }
 
+export const callAIQuizGeneration = async (payload: {
+  phase: string
+  language: string
+  criteria: { id: string; description: string; goal: string }[]
+}) => {
+  return payload.criteria.map((criterion, index) => ({
+    criteriaId: criterion.id,
+    questionText: `Explain how you would demonstrate this learning goal: ${criterion.description}`,
+    questionType: "DIRECT" as const,
+    options: null,
+    correctConcept: criterion.goal,
+    order: index + 1
+  }))
+}
+
+export const callAIQuizScoring = async (payload: {
+  questionText: string
+  correctConcept: string
+  studentAnswer: string
+  language: string
+}) => {
+  const answer = payload.studentAnswer.trim()
+  const keyTerms = payload.correctConcept
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((term) => term.length > 3)
+  const matchedTerms = keyTerms.filter((term) => answer.toLowerCase().includes(term)).length
+  const score = keyTerms.length > 0 && matchedTerms / keyTerms.length >= 0.25 ? 85 : 60
+
+  return {
+    score,
+    feedback: score >= 80
+      ? "Mock scoring: your answer addresses the target concept."
+      : "Mock scoring: add more detail about the target concept.",
+    evidence: answer
+  }
+}
+
 export const callAIInsight = async (payload: {
   criteriaResults: unknown[]
   duringClassLogs: unknown[]
