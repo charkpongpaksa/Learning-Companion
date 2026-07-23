@@ -1,49 +1,59 @@
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL!
+export type AIChatMessage = {
+  role: "STUDENT" | "AGENT"
+  content: string
+  createdAt?: Date
+}
+
+export type AIChatResponse = {
+  response: string
+  confidence: number
+  usedExternalAPI: boolean
+  externalSource: string | null
+  flaggedCriteria: string[]
+  detectedLanguage: "en" | "th"
+}
 
 export const callAIChat = async (payload: {
   phase: string
   language: string
   studentMessage: string
-  recentMessages: any[]
+  recentMessages: AIChatMessage[]
   summary: string
-  sessionCriteria: any[]
+  sessionCriteria: { id: string; description: string; goal: string }[]
   teacherMaterial: string
-}) => {
-  // Mock response while AI teammate isn't ready
+}): Promise<AIChatResponse> => {
+  // Mock response while AI teammate isn't ready.
   return {
     response: "Mock AI response for testing",
     confidence: 0.9,
     usedExternalAPI: false,
     externalSource: null,
     flaggedCriteria: [],
-    detectedLanguage: payload.language
+    detectedLanguage: payload.language === "th" ? "th" : "en"
   }
+}
 
-  // Uncomment when AI teammate is ready:
-  // const res = await fetch(`${AI_SERVICE_URL}/chat`, {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(payload)
-  // })
-  // return res.json()
+export const callAIImageAnalysis = async (payload: {
+  imageUrl: string
+  sessionId: string
+  availableMaterials: { id: string; fileName: string; fileUrl: string; fileType: string }[]
+}) => {
+  // Mock response while AI teammate isn't ready.
+  return {
+    materialId: null as string | null,
+    pageNumber: null as number | null,
+    confidence: 0,
+    description: `Uploaded file received: ${payload.imageUrl}`
+  }
 }
 
 export const callAIInsight = async (payload: {
-  criteriaResults: any[]
-  duringClassLogs: any[]
+  criteriaResults: unknown[]
+  duringClassLogs: unknown[]
   caughtUpCount: number
   totalStudents: number
 }) => {
-  // Mock response while AI teammate isn't ready
-  return {
-    insight: "Mock insight for testing"
-  }
-
-  // Uncomment when AI teammate is ready:
-  // const res = await fetch(`${AI_SERVICE_URL}/insight`, {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(payload)
-  // })
-  // return res.json()
+  void payload
+  // Mock response while AI teammate isn't ready.
+  return { insight: "Mock insight for testing" }
 }
