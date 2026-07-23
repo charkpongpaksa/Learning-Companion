@@ -56,7 +56,7 @@ export default function StudentSidebar({
     pathname === '/student/dashboard' || 
     pathname === '/student/sessions';
 
-  const isMaterialsActive = pathname.startsWith('/student/materials');
+  const isMaterialsActive = pathname.startsWith('/student/material');
   const isProgressActive = pathname.startsWith('/student/progress');
 
   return (
@@ -154,7 +154,7 @@ export default function StudentSidebar({
                 </Link>
 
                 <Link 
-                  href="/student/materials" 
+                  href="/student/material" 
                   className={`flex items-center gap-2.5 px-3 py-2 text-[14px] font-medium rounded-lg transition-colors ${
                     isMaterialsActive 
                       ? 'text-[#d84315] bg-[#fff3ed] font-bold' 

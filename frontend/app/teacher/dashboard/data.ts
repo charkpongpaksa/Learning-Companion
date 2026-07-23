@@ -16,21 +16,6 @@ export const TEACHER_SUBJECTS = [
       studentsCaughtUp: '90%',
     },
   },
-  {
-    id: 2,
-    code: 'CS242',
-    name: 'Systems Programming',
-    displayShort: 'CS242 · Systems Programming',
-    subtitle: 'Concurrency, memory, and C systems code',
-    weeks: '3 weeks',
-    stats: {
-      avgReadiness: '84%',
-      semesterProgress: '65%',
-      progressCriteria: 'Based on labs and quizzes',
-      sessionsRun: 9,
-      studentsCaughtUp: '86%',
-    },
-  },
 ];
 
 export const TEACHER_SESSIONS = {
@@ -71,34 +56,5 @@ export const TEACHER_SESSIONS = {
       avgReadiness: '–',
       isLive: false,
     },
-  ],
-  CS242: [
-    {
-      id: 5,
-      week: 'Week 1',
-      title: 'Process management',
-      status: 'Completed',
-      segments: ['bg-sky-400', 'bg-sky-300', 'bg-sky-200', 'bg-stone-100'],
-      avgReadiness: '88%',
-      isLive: false,
-    },
-    {
-      id: 6,
-      week: 'Week 2',
-      title: 'Pthreads and synchronization',
-      status: 'Active',
-      segments: ['bg-orange-400', 'bg-orange-300', 'bg-orange-200', 'bg-stone-100'],
-      avgReadiness: '85%',
-      isLive: true,
-    },
-    {
-      id: 7,
-      week: 'Week 3',
-      title: 'Memory management',
-      status: 'Upcoming',
-      segments: ['bg-slate-400', 'bg-slate-300', 'bg-slate-200', 'bg-stone-100'],
-      avgReadiness: '–',
-      isLive: false,
-    },
-  ],
+  ]
 };

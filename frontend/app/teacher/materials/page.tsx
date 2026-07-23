@@ -1,11 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { UploadCloud, FileText, Upload, File, X, Loader2, CheckCircle2 } from 'lucide-react';
-import TeacherSidebar from '@/components/teachersidebar'; // ⚠️ เช็ค Path Sidebar อีกครั้ง
+import React, { useState } from "react";
+import {
+  UploadCloud,
+  FileText,
+  Upload,
+  File,
+  X,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
+import TeacherSidebar from "@/components/teachersidebar"; // ⚠️ เช็ค Path Sidebar อีกครั้ง
 
 export default function MaterialsAndPromptsPage() {
-  const [activeTab, setActiveTab] = useState<'materials' | 'rubrics' | 'prompts'>('materials');
+  const [activeTab, setActiveTab] = useState<
+    "materials" | "rubrics" | "prompts"
+  >("materials");
 
   // State สำหรับเก็บไฟล์
   const [materialsFiles, setMaterialsFiles] = useState<File[]>([]);
@@ -17,9 +27,11 @@ export default function MaterialsAndPromptsPage() {
 
   // State สำหรับแท็บ System Prompts
   const [promptText, setPromptText] = useState(
-    'Answer in a Socratic style: ask one clarifying question before giving a full answer, and always tie explanations back to a real AWS scenario. Keep tone encouraging, never dismissive of a wrong guess.'
+    "Answer in a Socratic style: ask one clarifying question before giving a full answer, and always tie explanations back to a real AWS scenario. Keep tone encouraging, never dismissive of a wrong guess.",
   );
-  const [questionTypes, setQuestionTypes] = useState<{ [key: string]: boolean }>({
+  const [questionTypes, setQuestionTypes] = useState<{
+    [key: string]: boolean;
+  }>({
     multipleChoice: true,
     writtenShort: true,
     trueFalse: false,
@@ -30,9 +42,9 @@ export default function MaterialsAndPromptsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFiles = Array.from(e.target.files);
-      if (activeTab === 'materials') {
+      if (activeTab === "materials") {
         setMaterialsFiles((prev) => [...prev, ...selectedFiles]);
-      } else if (activeTab === 'rubrics') {
+      } else if (activeTab === "rubrics") {
         setRubricsFiles((prev) => [...prev, ...selectedFiles]);
       }
       setUploadSuccess(false); // รีเซ็ตสถานะความสำเร็จเมื่อมีการเลือกไฟล์เพิ่ม
@@ -41,7 +53,7 @@ export default function MaterialsAndPromptsPage() {
 
   // ฟังก์ชันลบไฟล์ออก
   const handleRemoveFile = (index: number) => {
-    if (activeTab === 'materials') {
+    if (activeTab === "materials") {
       setMaterialsFiles((prev) => prev.filter((_, i) => i !== index));
     } else {
       setRubricsFiles((prev) => prev.filter((_, i) => i !== index));
@@ -51,7 +63,8 @@ export default function MaterialsAndPromptsPage() {
 
   // 🚀 ฟังก์ชันกดปุ่ม Publish อัปโหลดจริง
   const handleUploadSubmit = async () => {
-    const filesToUpload = activeTab === 'materials' ? materialsFiles : rubricsFiles;
+    const filesToUpload =
+      activeTab === "materials" ? materialsFiles : rubricsFiles;
     if (filesToUpload.length === 0) return;
 
     setIsUploading(true);
@@ -61,9 +74,9 @@ export default function MaterialsAndPromptsPage() {
       // 📌 ตัวอย่างการเตรียมข้อมูลส่ง API
       const formData = new FormData();
       filesToUpload.forEach((file) => {
-        formData.append('files', file);
+        formData.append("files", file);
       });
-      formData.append('category', activeTab);
+      formData.append("category", activeTab);
 
       // -------------------------------------------------------------
       // จำลองการยิง API (Delay 1.5 วินาที)
@@ -73,8 +86,8 @@ export default function MaterialsAndPromptsPage() {
 
       setUploadSuccess(true);
     } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Failed to upload files.');
+      console.error("Upload failed:", error);
+      alert("Failed to upload files.");
     } finally {
       setIsUploading(false);
     }
@@ -84,7 +97,23 @@ export default function MaterialsAndPromptsPage() {
     setQuestionTypes((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const currentFiles = activeTab === 'materials' ? materialsFiles : rubricsFiles;
+  const currentFiles =
+    activeTab === "materials" ? materialsFiles : rubricsFiles;
+  // 🟢 เพิ่ม State ควบคุมการเปิด-ปิด Modal
+  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
+
+  // 🟢 ฟังก์ชันสำหรับกดปุ่ม Save for this session
+  const handleSaveForSession = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    // เปิด Modal
+    setIsSavedModalOpen(true);
+
+    // ซ่อน Modal อัตโนมัติใน 2.5 วินาที
+    setTimeout(() => {
+      setIsSavedModalOpen(false);
+    }, 1000);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#fdfbf7] text-stone-900 font-sans">
@@ -96,7 +125,7 @@ export default function MaterialsAndPromptsPage() {
         className="flex-1 pl-64 px-8 pt-14 pb-20 relative overflow-y-auto min-h-screen"
         style={{
           background:
-            'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)',
+            "radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)",
         }}
       >
         <div className="relative z-10 w-full max-w-6xl mx-auto space-y-6">
@@ -114,33 +143,33 @@ export default function MaterialsAndPromptsPage() {
           <div className="bg-white/60 backdrop-blur-sm p-1 rounded-2xl border border-stone-200/60 grid grid-cols-3 gap-1 w-full">
             <button
               type="button"
-              onClick={() => setActiveTab('materials')}
+              onClick={() => setActiveTab("materials")}
               className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                activeTab === 'materials'
-                  ? 'bg-[#e65100] text-white shadow-sm'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/50'
+                activeTab === "materials"
+                  ? "bg-[#e65100] text-white shadow-sm"
+                  : "text-stone-600 hover:text-stone-900 hover:bg-white/50"
               }`}
             >
               Materials
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('rubrics')}
+              onClick={() => setActiveTab("rubrics")}
               className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                activeTab === 'rubrics'
-                  ? 'bg-[#e65100] text-white shadow-sm'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/50'
+                activeTab === "rubrics"
+                  ? "bg-[#e65100] text-white shadow-sm"
+                  : "text-stone-600 hover:text-stone-900 hover:bg-white/50"
               }`}
             >
               Rubrics
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('prompts')}
+              onClick={() => setActiveTab("prompts")}
               className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                activeTab === 'prompts'
-                  ? 'bg-[#e65100] text-white shadow-sm'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-white/50'
+                activeTab === "prompts"
+                  ? "bg-[#e65100] text-white shadow-sm"
+                  : "text-stone-600 hover:text-stone-900 hover:bg-white/50"
               }`}
             >
               System prompts
@@ -148,7 +177,7 @@ export default function MaterialsAndPromptsPage() {
           </div>
 
           {/* TAB 1 & 2: MATERIALS / RUBRICS */}
-          {(activeTab === 'materials' || activeTab === 'rubrics') && (
+          {(activeTab === "materials" || activeTab === "rubrics") && (
             <div className="space-y-6 w-full">
               {/* Drag and Drop Zone */}
               <div className="bg-white border-2 border-dashed border-stone-200 rounded-2xl p-7 text-center flex flex-col items-center justify-center space-y-3">
@@ -160,9 +189,9 @@ export default function MaterialsAndPromptsPage() {
                     Drag and drop files here
                   </h3>
                   <p className="text-xs text-stone-400 mt-0.5">
-                    {activeTab === 'materials'
-                      ? 'or browse from your device · PDF, DOCX, PPTX up to 25 MB'
-                      : 'grading rubrics or scoring guides · PDF, DOCX, XLSX up to 25 MB'}
+                    {activeTab === "materials"
+                      ? "or browse from your device · PDF, DOCX, PPTX up to 25 MB"
+                      : "grading rubrics or scoring guides · PDF, DOCX, XLSX up to 25 MB"}
                   </p>
                 </div>
 
@@ -176,9 +205,9 @@ export default function MaterialsAndPromptsPage() {
                     multiple
                     className="hidden"
                     accept={
-                      activeTab === 'materials'
-                        ? '.pdf,.docx,.pptx'
-                        : '.pdf,.docx,.xlsx'
+                      activeTab === "materials"
+                        ? ".pdf,.docx,.pptx"
+                        : ".pdf,.docx,.xlsx"
                     }
                   />
                 </label>
@@ -187,7 +216,9 @@ export default function MaterialsAndPromptsPage() {
               {/* Recently / Selected Uploaded Section */}
               <div className="space-y-3 pt-1">
                 <h4 className="text-xs font-bold text-stone-500">
-                  {currentFiles.length > 0 ? 'Selected files ready to publish' : 'Recently uploaded'}
+                  {currentFiles.length > 0
+                    ? "Selected files ready to publish"
+                    : "Recently uploaded"}
                 </h4>
 
                 {currentFiles.length === 0 ? (
@@ -196,9 +227,9 @@ export default function MaterialsAndPromptsPage() {
                       <FileText size={18} />
                     </div>
                     <p className="text-xs font-bold text-stone-800">
-                      {activeTab === 'materials'
-                        ? 'No materials uploaded yet'
-                        : 'No rubrics uploaded yet'}
+                      {activeTab === "materials"
+                        ? "No materials uploaded yet"
+                        : "No rubrics uploaded yet"}
                     </p>
                     <p className="text-[11px] text-stone-400 max-w-xs">
                       Files you add above will appear here before you publish
@@ -265,7 +296,11 @@ export default function MaterialsAndPromptsPage() {
                         <>
                           <Upload size={16} />
                           <span>
-                            Publish {activeTab === 'materials' ? 'materials' : 'rubrics'} ({currentFiles.length})
+                            Publish{" "}
+                            {activeTab === "materials"
+                              ? "materials"
+                              : "rubrics"}{" "}
+                            ({currentFiles.length})
                           </span>
                         </>
                       )}
@@ -277,7 +312,7 @@ export default function MaterialsAndPromptsPage() {
           )}
 
           {/* TAB 3: SYSTEM PROMPTS */}
-          {activeTab === 'prompts' && (
+          {activeTab === "prompts" && (
             <div className="space-y-4 w-full">
               {/* Card 1 */}
               <div className="bg-white border border-stone-200/60 rounded-2xl p-8 shadow-sm space-y-3">
@@ -313,11 +348,11 @@ export default function MaterialsAndPromptsPage() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => toggleQuestionType('multipleChoice')}
+                    onClick={() => toggleQuestionType("multipleChoice")}
                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                       questionTypes.multipleChoice
-                        ? 'bg-orange-50 border-orange-200 text-[#e65100]'
-                        : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
+                        ? "bg-orange-50 border-orange-200 text-[#e65100]"
+                        : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"
                     }`}
                   >
                     Multiple choice
@@ -325,11 +360,11 @@ export default function MaterialsAndPromptsPage() {
 
                   <button
                     type="button"
-                    onClick={() => toggleQuestionType('writtenShort')}
+                    onClick={() => toggleQuestionType("writtenShort")}
                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                       questionTypes.writtenShort
-                        ? 'bg-orange-50 border-orange-200 text-[#e65100]'
-                        : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
+                        ? "bg-orange-50 border-orange-200 text-[#e65100]"
+                        : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"
                     }`}
                   >
                     Written / short answer
@@ -337,11 +372,11 @@ export default function MaterialsAndPromptsPage() {
 
                   <button
                     type="button"
-                    onClick={() => toggleQuestionType('trueFalse')}
+                    onClick={() => toggleQuestionType("trueFalse")}
                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                       questionTypes.trueFalse
-                        ? 'bg-orange-50 border-orange-200 text-[#e65100]'
-                        : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
+                        ? "bg-orange-50 border-orange-200 text-[#e65100]"
+                        : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"
                     }`}
                   >
                     True / false
@@ -366,8 +401,9 @@ export default function MaterialsAndPromptsPage() {
               {/* Save Button */}
               <div className="flex justify-end pt-1">
                 <button
-                  type="button"
-                  className="bg-[#e65100] hover:bg-[#d84315] text-white font-bold text-xs px-7 py-3 rounded-xl shadow-md active:scale-95 transition-all cursor-pointer"
+                  type="button" // หรือ type="submit" ถ้าอยู่ใน <form>
+                  onClick={handleSaveForSession}
+                  className="bg-[#e65100] hover:bg-[#d84315] text-white font-bold px-6 py-3 rounded-full text-xs shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
                   Save for this session
                 </button>
@@ -376,6 +412,26 @@ export default function MaterialsAndPromptsPage() {
           )}
         </div>
       </main>
-    </div>
+
+      {/* 🟢 Saved Success Modal */}
+      {isSavedModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] transition-all animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 shadow-2xl border border-stone-100 flex flex-col items-center text-center max-w-sm w-full mx-4 space-y-3 transform animate-in zoom-in-95 duration-200">
+            {/* ไอคอนติ๊กถูกสีเขียว */}
+            <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center">
+              <CheckCircle2 size={32} strokeWidth={2.5} />
+            </div>
+
+            {/* ข้อความแจ้งเตือน */}
+            <div>
+              <h3 className="text-lg font-bold text-stone-900">Saved</h3>
+              <p className="text-xs text-stone-500 mt-1">
+                Prompt and quiz settings updated for this session.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div> 
   );
 }

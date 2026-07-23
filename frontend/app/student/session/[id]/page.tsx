@@ -1,32 +1,26 @@
-'use client';
+"use client";
 
-import React, { useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { 
-  Layers, 
-  FileText, 
-  TrendingUp, 
-  Settings, 
-  LogOut, 
-  ChevronLeft, 
-  ChevronDown, 
+import React, { useState, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import {
+  Layers,
+  FileText,
+  TrendingUp,
+  Settings,
+  LogOut,
+  ChevronLeft,
+  ChevronDown,
   Send,
   Paperclip,
   X,
-  Plus
-} from 'lucide-react';
-import { SESSIONS_BY_SUBJECT } from '../../dashboard/data'; // ปรับ path ให้ตรงกับที่เก็บ data.ts
-import StudentSidebar from '@/components/studentsidebar';
-
-// ข้อมูลวิชาสำหรับ Dropdown
-const SUBJECTS = [
-  { id: 'cs332', displayShort: 'CS332 · Basic Cloud Computing', weeks: '10 weeks' },
-  { id: 'cs211', displayShort: 'CS211 · Advanced Data Structures', weeks: '8 weeks' },
-];
+  Plus,
+} from "lucide-react";
+import { SESSIONS_BY_SUBJECT } from "../../dashboard/data"; // ปรับ path ให้ตรงกับที่เก็บ data.ts
+import StudentSidebar from "@/components/studentsidebar";
 
 interface Message {
   id: number;
-  sender: 'user' | 'bot';
+  sender: "user" | "bot";
   text: string;
   image?: string;
 }
@@ -37,11 +31,9 @@ export default function Page() {
   const sessionId = params.id as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // State สำหรับ Subject Dropdown & Add Subject Modal
-  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
-  const [subjectCode, setSubjectCode] = useState('');
+  const [subjectCode, setSubjectCode] = useState("");
 
   // ค้นหาข้อมูล Session จาก data.ts
   const allSessions = Object.values(SESSIONS_BY_SUBJECT).flat();
@@ -51,12 +43,12 @@ export default function Page() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      sender: 'bot',
-      text: `Hello Somchai! 👋 Welcome to ${currentSession?.week || 'Week 3'} (${currentSession?.title || 'EC2 and IAM'}). Feel free to ask any questions or share your thoughts about this session!`,
+      sender: "bot",
+      text: `Hello Somchai! 👋 Welcome to ${currentSession?.week || "Week 3"} (${currentSession?.title || "EC2 and IAM"}). Feel free to ask any questions or share your thoughts about this session!`,
     },
   ]);
 
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // ฟังก์ชันส่งรหัสวิชา (Add Subject)
@@ -64,7 +56,7 @@ export default function Page() {
     e.preventDefault();
     alert(`กำลังเพิ่มวิชาด้วยโค้ด: ${subjectCode}`);
     setIsAddSubjectModalOpen(false);
-    setSubjectCode('');
+    setSubjectCode("");
   };
 
   // ฟังก์ชันเลือกรูปภาพ
@@ -86,41 +78,40 @@ export default function Page() {
 
     setMessages((prev) => [
       ...prev,
-      { 
-        id: Date.now(), 
-        sender: 'user', 
+      {
+        id: Date.now(),
+        sender: "user",
         text: inputMessage,
-        image: selectedImage || undefined
+        image: selectedImage || undefined,
       },
     ]);
 
-    setInputMessage('');
+    setInputMessage("");
     setSelectedImage(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
-  const weekTitle = currentSession?.week || 'Week 3';
-  const sessionTitle = currentSession?.title || 'EC2 and IAM';
+  const weekTitle = currentSession?.week || "Week 3";
+  const sessionTitle = currentSession?.title || "EC2 and IAM";
   const description =
     currentSession?.description ||
-    'Ask questions before class. Your gaps carry over to a short quiz.';
+    "Ask questions before class. Your gaps carry over to a short quiz.";
 
   return (
     <div className="flex min-h-screen bg-[#fdfbf7] text-stone-900 font-sans">
-      
       <StudentSidebar />
 
       {/* RIGHT MAIN CONTENT */}
-      <main 
+      <main
         className="flex-1 pl-64 px-8 pt-12 pb-8 relative overflow-hidden"
         style={{
-          background: 'radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)'
+          background:
+            "radial-gradient(ellipse 1600px 600px at 70% 0%, #ffd4a8 0%, #ffdfb8 20%, #ffe9cc 40%, #fff2e0 60%, #ffebd6 100%)",
         }}
       >
         <div className="relative z-10 max-w-6xl mx-auto space-y-5">
-          
           {/* Header & Back Button */}
           <div>
             <button
@@ -136,15 +127,15 @@ export default function Page() {
                 <h2 className="text-2xl font-bold text-stone-900 tracking-tight">
                   {weekTitle} — {sessionTitle}
                 </h2>
-                <p className="text-xs text-stone-400 mt-1">
-                  {description}
-                </p>
+                <p className="text-xs text-stone-400 mt-1">{description}</p>
               </div>
 
               {/* ปุ่มสีส้ม Take readiness quiz */}
               <button
                 suppressHydrationWarning
-                onClick={() => alert('Starting readiness quiz...')}
+                onClick={() =>
+                  router.push(`/student/session/${sessionId}/quiz`)
+                } // 👈 เปลี่ยน Path ตามโครงสร้างโฟลเดอร์ Quiz ของน้องได้เลยครับ
                 className="self-start md:self-auto px-6 py-4 bg-[#e65100] hover:bg-[#d84315] text-white text-[13px] font-bold rounded-full shadow-sm hover:shadow transition-all active:scale-95 cursor-pointer flex-shrink-0"
               >
                 Take readiness quiz
@@ -154,7 +145,6 @@ export default function Page() {
 
           {/* Chat Card Box */}
           <div className="bg-white border border-stone-200/80 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col justify-between min-h-[580px]">
-            
             {/* Header inside chat */}
             <div className="flex items-center justify-between pb-4 border-b border-stone-100">
               <h2 className="text-sm md:text-base font-bold text-stone-800">
@@ -171,22 +161,22 @@ export default function Page() {
                 <div
                   key={msg.id}
                   className={`flex ${
-                    msg.sender === 'user' ? 'justify-end' : 'justify-start'
+                    msg.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   <div
                     className={`max-w-[85%] md:max-w-[70%] text-xs md:text-sm leading-relaxed px-5 py-3.5 rounded-2xl ${
-                      msg.sender === 'user'
-                        ? 'bg-[#d84315] text-white rounded-tr-xs font-normal shadow-sm'
-                        : 'bg-[#e8e5df] text-stone-800 rounded-tl-xs font-normal'
+                      msg.sender === "user"
+                        ? "bg-[#d84315] text-white rounded-tr-xs font-normal shadow-sm"
+                        : "bg-[#e8e5df] text-stone-800 rounded-tl-xs font-normal"
                     }`}
                   >
                     {/* หากมีรูปภาพแนบมากับข้อความ ให้แสดงรูป */}
                     {msg.image && (
-                      <img 
-                        src={msg.image} 
-                        alt="attachment" 
-                        className="max-h-48 rounded-xl mb-2.5 object-cover border border-black/10" 
+                      <img
+                        src={msg.image}
+                        alt="attachment"
+                        className="max-h-48 rounded-xl mb-2.5 object-cover border border-black/10"
                       />
                     )}
                     {msg.text && <p>{msg.text}</p>}
@@ -196,12 +186,18 @@ export default function Page() {
             </div>
 
             {/* Form & Input Box (พร้อมปุ่มแนบรูป) */}
-            <form onSubmit={handleSend} className="relative flex flex-col gap-2 pt-2">
-              
+            <form
+              onSubmit={handleSend}
+              className="relative flex flex-col gap-2 pt-2"
+            >
               {/* 🖼️ ภาพตัวอย่างพรีวิวก่อนส่ง ( Preview ) */}
               {selectedImage && (
                 <div className="relative inline-block w-20 h-20 rounded-xl overflow-hidden border border-stone-300 shadow-sm ml-2">
-                  <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={selectedImage}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                   <button
                     suppressHydrationWarning
                     type="button"
@@ -214,7 +210,6 @@ export default function Page() {
               )}
 
               <div className="relative flex items-center w-full">
-                
                 {/* 📎 Input file ที่ซ่อนไว้ */}
                 <input
                   type="file"
@@ -255,62 +250,9 @@ export default function Page() {
                 </button>
               </div>
             </form>
-
           </div>
-
         </div>
       </main>
-
-      {/* ADD A SUBJECT MODAL POPUP */}
-      {isAddSubjectModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4 transition-all">
-          <div className="bg-white rounded-[26px] max-w-[460px] w-full p-7 relative shadow-2xl border border-stone-100 text-left animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="text-[20px] font-bold text-stone-950 tracking-tight">
-                Add a subject
-              </h3>
-              <button 
-                onClick={() => { setIsAddSubjectModalOpen(false); setSubjectCode(''); }}
-                className="text-stone-400 hover:text-stone-600 transition-colors p-1 rounded-md cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <p className="text-[13px] text-stone-500 font-normal leading-relaxed mb-5">
-              Enter the code your teacher gave you to add their subject.
-            </p>
-
-            <form onSubmit={handleAddSubjectSubmit} className="space-y-6">
-              <input
-                type="text"
-                placeholder="e.g. CS332"
-                value={subjectCode}
-                onChange={(e) => setSubjectCode(e.target.value)}
-                required
-                className="w-full bg-stone-100/90 border border-stone-200/80 rounded-[14px] px-4 py-3.5 text-sm placeholder:text-stone-400 text-stone-900 outline-none focus:border-stone-400 transition-all font-medium"
-              />
-
-              <div className="flex justify-end gap-2.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setIsAddSubjectModalOpen(false); setSubjectCode(''); }}
-                  className="px-5 py-2 border border-stone-950 text-stone-950 font-bold text-[13px] rounded-full hover:bg-stone-50 transition-all active:scale-[0.97] cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-[#f89b78] hover:bg-[#e65100] text-white font-bold text-[13px] rounded-full shadow-sm transition-all active:scale-[0.97] cursor-pointer"
-                >
-                  Add subject
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

@@ -213,9 +213,9 @@ export default function TeacherSidebar() {
                   Materials & prompts
                 </Link>
                 <Link
-                  href="/teacher/subjects"
+                  href="/teacher/setting"
                   className={`flex items-center gap-2.5 px-3 py-2 text-[14px] rounded-lg transition-colors ${
-                    pathname === "/teacher/subjects"
+                    pathname === "/teacher/setting"
                       ? "font-bold text-[#d84315] bg-[#fff3ed]"
                       : "font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   }`}
@@ -223,7 +223,7 @@ export default function TeacherSidebar() {
                   <Settings
                     size={15}
                     className={
-                      pathname === "/teacher/subjects" ? "" : "text-stone-400"
+                      pathname === "/teacher/setting" ? "" : "text-stone-400"
                     }
                   />
                   Subject settings
