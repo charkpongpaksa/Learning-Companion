@@ -30,6 +30,16 @@ export function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Internal ingestion routes authenticate with a server-to-server secret,
+  // not a user JWT.
+  if (pathname === "/api/v1/training/store") {
+    const internalSecret = process.env.INTERNAL_API_SECRET
+    if (!internalSecret || request.headers.get("x-internal-api-secret") !== internalSecret) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 })
+    }
+    return NextResponse.next()
+  }
+
   // Get and verify token
   const token = getTokenFromRequest(request)
 
