@@ -12,70 +12,33 @@ import {
   X,
 } from "lucide-react";
 
-import { SUBJECTS } from "../dashboard/data"; // ปรับ Path ตามโครงสร้างโฟลเดอร์ของคุณ
-
-// ข้อมูลจำลองสถิติสรุปภาพรวม
-const STATS = [
-  {
-    label: "Avg readiness",
-    value: "79%",
-    subtext: "across 2 completed sessions",
-  },
-  {
-    label: "Criteria met",
-    value: "6 / 9",
-    subtext: "cumulative for this subject",
-  },
-  {
-    label: "Sessions done",
-    value: "2 / 4",
-    subtext: "this semester",
-  },
-  {
-    label: "Questions asked",
-    value: "14",
-    subtext: "before class each week",
-  },
-];
-
-// ข้อมูลจำลองพัฒนาการแต่ละ Session
-const SESSION_PROGRESS = [
-  {
-    id: "1",
-    weekTitle: "Week 1 — Cloud fundamentals",
-    status: "Completed",
-    percentage: 94,
-    color: "bg-emerald-500", // สีเขียวสำหรับ Completed
-  },
-  {
-    id: "2",
-    weekTitle: "Week 2 — S3 and storage tiers",
-    status: "Completed",
-    percentage: 82,
-    color: "bg-emerald-500",
-  },
-  {
-    id: "3",
-    weekTitle: "Week 3 — EC2 and IAM",
-    status: "Active",
-    percentage: 67,
-    color: "bg-[#e65100]", // สีส้มสำหรับ Active
-  },
-  {
-    id: "4",
-    weekTitle: "Week 4 — VPC networking",
-    status: "Not started",
-    percentage: 0,
-    color: "bg-stone-200",
-  },
-];
+import {
+  getStudentDashboardViewModel,
+  getStudentProgressViewModel,
+} from "@/lib/api";
 
 export default function MyProgressPage() {
+  const dashboardViewModel = React.useMemo(
+    () => getStudentDashboardViewModel(),
+    [],
+  );
   // State สำหรับ Sidebar และ Modal Add Subject
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
+  const [selectedSubject, setSelectedSubject] = useState(
+    dashboardViewModel.subjects[0] ?? {
+      id: 0,
+      code: "",
+      name: "",
+      displayShort: "",
+      weeks: "",
+    },
+  );
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
   const [subjectCode, setSubjectCode] = useState("");
+  const progressViewModel = React.useMemo(
+    () => getStudentProgressViewModel(selectedSubject.code),
+    [selectedSubject.code],
+  );
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
@@ -115,7 +78,7 @@ export default function MyProgressPage() {
                   {selectedSubject.displayShort}
                 </p>
                 <p className="text-[10px] text-stone-400 font-medium">
-                  {SUBJECTS.length} subjects
+                  {dashboardViewModel.subjects.length} subjects
                 </p>
               </div>
               <ChevronDown
@@ -128,7 +91,7 @@ export default function MyProgressPage() {
             {isDropdownOpen && (
               <div className="absolute left-3 right-3 top-full mt-1.5 bg-white border border-stone-200 shadow-xl rounded-xl z-30 overflow-hidden divide-y divide-stone-100">
                 <div>
-                  {SUBJECTS.map((subject) => {
+                  {dashboardViewModel.subjects.map((subject) => {
                     const isSelected = subject.id === selectedSubject.id;
                     return (
                       <div
@@ -234,6 +197,7 @@ export default function MyProgressPage() {
 
       {/* ================= 2. MAIN CONTENT ================= */}
       <main
+        suppressHydrationWarning
         className="flex-1 pl-64 p-8 pt-14 pb-8 relative overflow-hidden text-left"
         style={{
           background:
@@ -255,7 +219,7 @@ export default function MyProgressPage() {
 
           {/* 1. สรุปสถิติ 4 ช่อง (Summary Stat Cards) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {STATS.map((stat, idx) => (
+            {progressViewModel.stats.map((stat, idx) => (
               <div
                 key={idx}
                 className="bg-white border border-stone-200/70 rounded-2xl p-5 shadow-sm text-left"
@@ -280,7 +244,7 @@ export default function MyProgressPage() {
             </h2>
 
             <div className="bg-white border border-stone-200/70 rounded-2xl p-6 shadow-sm divide-y divide-stone-100">
-              {SESSION_PROGRESS.map((item) => (
+              {progressViewModel.progress.map((item) => (
                 <div
                   key={item.id}
                   className="py-4 first:pt-0 last:pb-0 space-y-2"

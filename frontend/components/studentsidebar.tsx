@@ -63,7 +63,10 @@ export default function StudentSidebar({
 
   return (
     <>
-      <aside className="w-64 bg-white border-r border-stone-200/60 flex flex-col justify-between fixed h-full z-20 top-0 left-0">
+      <aside
+        suppressHydrationWarning
+        className="w-64 bg-white border-r border-stone-200/60 flex flex-col justify-between fixed h-full z-20 top-0 left-0"
+      >
         <div>
           {/* Logo Brand */}
           <div className="p-5 flex items-center gap-2">

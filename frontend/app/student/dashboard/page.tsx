@@ -15,12 +15,21 @@ import {
   X,
 } from "lucide-react";
 
-import { SUBJECTS, SESSIONS_BY_SUBJECT } from "./data";
+import { getStudentDashboardViewModel } from "@/lib/api";
 import StudentSidebar from "@/components/studentsidebar";
 
 export default function Studentsidebar() {
+  const viewModel = React.useMemo(() => getStudentDashboardViewModel(), []);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
+  const [selectedSubject, setSelectedSubject] = useState(
+    viewModel.subjects[0] ?? {
+      id: 0,
+      code: "",
+      name: "",
+      displayShort: "",
+      weeks: "",
+    },
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   // State สำหรับ Modal "Add a subject" (ตามรูปที่ 2)
@@ -41,9 +50,7 @@ export default function Studentsidebar() {
   };
 
   const currentSessions =
-    SESSIONS_BY_SUBJECT[
-      selectedSubject.code as keyof typeof SESSIONS_BY_SUBJECT
-    ] || [];
+    viewModel.sessionsBySubject[selectedSubject.code] ?? [];
 
   const filteredSessions = currentSessions.filter((session) => {
     const query = searchQuery.toLowerCase().trim();
@@ -60,6 +67,7 @@ export default function Studentsidebar() {
 
       {/* RIGHT MAIN CONTENT */}
       <main
+        suppressHydrationWarning
         className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden text-left"
         style={{
           background:

@@ -81,7 +81,10 @@ export default function TeacherSidebar() {
   return (
     <>
       {/* LEFT SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-stone-200/60 flex flex-col justify-between fixed h-full z-20">
+      <aside
+        suppressHydrationWarning
+        className="w-64 bg-white border-r border-stone-200/60 flex flex-col justify-between fixed h-full z-20"
+      >
         <div>
           <div className="p-5 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#e65100]" />

@@ -14,75 +14,25 @@ import {
   X,
 } from "lucide-react";
 
-import { SUBJECTS } from "../dashboard/data";
+import { getStudentMaterialsViewModel } from "@/lib/api";
 import StudentSidebar from "@/components/studentsidebar";
-
-// ข้อมูลจำลองเอกสารการเรียนตามสัปดาห์
-interface MaterialItem {
-  id: string;
-  title: string;
-  type: string;
-  size: string;
-  updatedAt: string;
-  downloadUrl: string;
-}
-
-interface WeekGroup {
-  weekTitle: string;
-  items: MaterialItem[];
-}
-
-const initialMaterialsData: WeekGroup[] = [
-  {
-    weekTitle: "Week 3 — EC2 and IAM",
-    items: [
-      {
-        id: "1",
-        title: "IAM Fundamentals — lecture slides",
-        type: "PDF",
-        size: "2.4 MB",
-        updatedAt: "updated Mar 14",
-        downloadUrl: "#",
-      },
-      {
-        id: "2",
-        title: "AWS Security Best Practices — further reading",
-        type: "PDF",
-        size: "810 KB",
-        updatedAt: "updated Mar 13",
-        downloadUrl: "#",
-      },
-    ],
-  },
-  {
-    weekTitle: "Week 2 — S3 and storage tiers",
-    items: [
-      {
-        id: "3",
-        title: "Object Storage — lecture slides",
-        type: "PDF",
-        size: "3.1 MB",
-        updatedAt: "updated Mar 7",
-        downloadUrl: "#",
-      },
-      {
-        id: "4",
-        title: "S3 Lifecycle — practice worksheet",
-        type: "DOCX",
-        size: "220 KB",
-        updatedAt: "updated Mar 6",
-        downloadUrl: "#",
-      },
-    ],
-  },
-];
 
 export default function StudentMaterials() {
   // State สำหรับ Sidebar และ Modal Add Subject
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
+  const [selectedSubject] = useState({
+    id: 1,
+    code: "CS332",
+    name: "Basic Cloud Computing",
+    displayShort: "CS332 · Basic Cloud Computing",
+    weeks: "4 weeks",
+  });
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
   const [subjectCode, setSubjectCode] = useState("");
+  const viewModel = React.useMemo(
+    () => getStudentMaterialsViewModel(selectedSubject.code),
+    [selectedSubject.code],
+  );
 
   // State สำหรับ ค้นหา Materials
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,7 +52,7 @@ export default function StudentMaterials() {
   };
 
   // Logic สำหรับค้นหาเอกสาร
-  const filteredData = initialMaterialsData
+  const filteredData = viewModel.groups
     .map((group) => {
       const filteredItems = group.items.filter((item) =>
         item.title.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -123,6 +73,7 @@ export default function StudentMaterials() {
 
       {/* RIGHT MAIN CONTENT */}
       <main
+        suppressHydrationWarning
         className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden text-left"
         style={{
           background:

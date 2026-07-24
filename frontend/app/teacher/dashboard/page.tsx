@@ -16,22 +16,21 @@ import {
   X,
 } from "lucide-react";
 
-// ดึงข้อมูลวิชาและบทเรียนจากไฟล์ data.ts
-import { TEACHER_SUBJECTS, TEACHER_SESSIONS } from "./data";
+import { getTeacherDashboardViewModel } from "@/lib/api";
 
 type TeacherSubject = {
   id: number;
   code: string;
   name: string;
   displayShort: string;
-  subtitle: string;
+  subtitle?: string;
   weeks: string;
-  stats: {
-    avgReadiness: string;
-    semesterProgress: string;
-    progressCriteria: string;
-    sessionsRun: number;
-    studentsCaughtUp: string;
+  stats?: {
+    avgReadiness?: string;
+    semesterProgress?: string;
+    progressCriteria?: string;
+    sessionsRun?: number;
+    studentsCaughtUp?: string;
   };
 };
 
@@ -46,9 +45,10 @@ type TeacherSession = {
 };
 
 export default function Page() {
+  const viewModel = React.useMemo(() => getTeacherDashboardViewModel(), []);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [selectedSubject, setSelectedSubject] = React.useState<TeacherSubject>(
-    TEACHER_SUBJECTS[0] || {
+    viewModel.subjects[0] || {
       id: 0,
       code: "",
       name: "",
@@ -113,11 +113,8 @@ export default function Page() {
 
   // ดึงข้อมูลบทเรียนของวิชาที่เลือก
   const currentSessions: TeacherSession[] =
-    selectedSubject?.code &&
-    TEACHER_SESSIONS[selectedSubject.code as keyof typeof TEACHER_SESSIONS]
-      ? (TEACHER_SESSIONS[
-          selectedSubject.code as keyof typeof TEACHER_SESSIONS
-        ] as TeacherSession[])
+    selectedSubject?.code && viewModel.sessionsBySubject[selectedSubject.code]
+      ? viewModel.sessionsBySubject[selectedSubject.code]
       : [];
   // ระบบกรองข้อมูลค้นหาบทเรียน
   const filteredSessions = (currentSessions || []).filter((session: any) => {
@@ -134,6 +131,7 @@ export default function Page() {
 
       {/* RIGHT MAIN CONTENT */}
       <main
+        suppressHydrationWarning
         className="flex-1 pl-64 px-8 pt-14 pb-8 relative overflow-hidden"
         style={{
           background:
@@ -152,7 +150,7 @@ export default function Page() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div suppressHydrationWarning className="flex items-center gap-3">
               <div className="relative w-64">
                 <Search
                   size={14}
@@ -292,14 +290,43 @@ export default function Page() {
                       </h4>
 
                       <div className="grid grid-cols-4 gap-1 mb-2">
-                        {session.segments?.map(
-                          (colorClass: string, index: number) => (
-                            <div
-                              key={index}
-                              className={`h-1.5 rounded-full ${colorClass}`}
-                            />
-                          ),
-                        )}
+                        {(() => {
+                          const readinessValue = Number(
+                            session.avgReadiness?.replace("%", "") ?? "0",
+                          );
+                          const fillCount =
+                            session.status === "Completed"
+                              ? 4
+                              : session.status === "Active"
+                                ? Math.min(
+                                    4,
+                                    Math.max(
+                                      0,
+                                      Math.round(readinessValue / 25),
+                                    ),
+                                  )
+                                : 0;
+
+                          return [0, 1, 2, 3].map((index) => {
+                            let segBg = "bg-stone-200";
+
+                            if (session.status === "Completed") {
+                              segBg = "bg-emerald-400";
+                            } else if (
+                              session.status === "Active" &&
+                              index < fillCount
+                            ) {
+                              segBg = "bg-orange-400";
+                            }
+
+                            return (
+                              <div
+                                key={index}
+                                className={`h-1.5 rounded-full ${segBg}`}
+                              />
+                            );
+                          });
+                        })()}
                       </div>
 
                       <div className="flex justify-between items-center text-[11px] text-stone-400 font-medium mb-2">
