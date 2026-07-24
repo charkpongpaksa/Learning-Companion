@@ -141,11 +141,11 @@ export default function Page() {
         <div className="relative z-10 max-w-6xl mx-auto space-y-6">
           {/* ส่วนหัวแสดงชื่อวิชา */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div>
+            <div className="max-w-2xl">
               <h2 className="text-2xl font-bold text-stone-900 tracking-tight">
                 {selectedSubject?.code} — {selectedSubject?.name}
               </h2>
-              <p className="text-xs text-stone-400 mt-1 font-medium">
+              <p className="text-sm text-stone-500 mt-1.5 leading-relaxed">
                 {selectedSubject?.subtitle}
               </p>
             </div>
@@ -177,53 +177,55 @@ export default function Page() {
 
           {/* ส่วนแสดงแถบสถิติภาพรวมคลาสเรียน */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-stone-200/50 rounded-xl p-4 shadow-sm text-left">
-              <p className="text-[11px] font-semibold text-stone-400">
-                Avg readiness
-              </p>
-              <p className="text-xl font-bold text-stone-900 mt-1.5">
-                {selectedSubject?.stats?.avgReadiness ?? "N/A"}
-              </p>
-              <p className="text-[10px] text-stone-400 mt-0.5">
-                across active sessions
-              </p>
-            </div>
-            <div className="bg-white border border-stone-200/50 rounded-xl p-4 shadow-sm text-left">
-              <p className="text-[11px] font-semibold text-stone-400">
-                Semester progress
-              </p>
-              <p className="text-xl font-bold text-stone-900 mt-1.5">
-                {selectedSubject?.stats?.semesterProgress ?? "0%"}
-              </p>
-              <p className="text-[10px] text-stone-400 mt-0.5">
-                {selectedSubject?.stats?.progressCriteria ?? ""}
-              </p>
-            </div>
-            <div className="bg-white border border-stone-200/50 rounded-xl p-4 shadow-sm text-left">
-              <p className="text-[11px] font-semibold text-stone-400">
-                Sessions run
-              </p>
-              <p className="text-xl font-bold text-stone-900 mt-1.5">
-                {selectedSubject?.stats?.sessionsRun ?? 0}
-              </p>
-              <p className="text-[10px] text-stone-400 mt-0.5">this semester</p>
-            </div>
-            <div className="bg-white border border-stone-200/50 rounded-xl p-4 shadow-sm text-left">
-              <p className="text-[11px] font-semibold text-stone-400">
-                Students caught up
-              </p>
-              <p className="text-xl font-bold text-stone-900 mt-1.5">
-                {selectedSubject?.stats?.studentsCaughtUp ?? "0/0"}
-              </p>
-              <p className="text-[10px] text-stone-400 mt-0.5">latest week</p>
-            </div>
+            {[
+              {
+                label: "Avg readiness",
+                value: selectedSubject?.stats?.avgReadiness ?? "N/A",
+                subtext: "across active sessions",
+              },
+              {
+                label: "Semester progress",
+                value: selectedSubject?.stats?.semesterProgress ?? "0%",
+                subtext: selectedSubject?.stats?.progressCriteria ?? "",
+              },
+              {
+                label: "Sessions run",
+                value: selectedSubject?.stats?.sessionsRun ?? 0,
+                subtext: "this semester",
+              },
+              {
+                label: "Students caught up",
+                value: selectedSubject?.stats?.studentsCaughtUp ?? "0/0",
+                subtext: "latest week",
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-2xl border border-stone-200/70 bg-white/90 p-4 shadow-sm text-left backdrop-blur-sm"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-stone-400">
+                  {item.label}
+                </p>
+                <p className="text-xl font-bold text-stone-900 mt-2">
+                  {item.value}
+                </p>
+                <p className="text-[10px] text-stone-400 mt-1">
+                  {item.subtext}
+                </p>
+              </div>
+            ))}
           </div>
 
           {/* หัวข้อรายการแผงสัปดาห์ */}
-          <div className="text-left pt-2">
-            <h3 className="text-sm font-bold text-stone-800">
-              Sessions ({selectedSubject?.weeks})
-            </h3>
+          <div className="flex items-center justify-between pt-2">
+            <div>
+              <h3 className="text-sm font-bold text-stone-800">
+                Sessions ({selectedSubject?.weeks})
+              </h3>
+              <p className="text-xs text-stone-400 mt-1">
+                Track weekly progress and keep each session easy to review.
+              </p>
+            </div>
           </div>
 
           {/* ลูปแสดงการ์ดบทเรียนของแต่ละสัปดาห์ */}
@@ -237,12 +239,12 @@ export default function Page() {
                 const wrapperProps = isUpcoming
                   ? {
                       className:
-                        "bg-white border border-stone-200/60 rounded-xl p-4 flex flex-col h-full shadow-sm transition-all text-left",
+                        "bg-white/95 border border-stone-200/70 rounded-2xl p-4 flex flex-col h-full shadow-sm transition-all text-left hover:shadow-md",
                     }
                   : {
                       href: `/teacher/session/${session.id}`,
                       className:
-                        "bg-white border border-stone-200/60 rounded-xl p-4 flex flex-col h-full shadow-sm hover:shadow-md/5 transition-all text-left",
+                        "bg-white/95 border border-stone-200/70 rounded-2xl p-4 flex flex-col h-full shadow-sm hover:shadow-md transition-all text-left",
                     };
 
                 return (
@@ -255,18 +257,18 @@ export default function Page() {
 
                         <div className="flex items-center gap-1.5">
                           {session.status === "Completed" && (
-                            <span className="px-2.5 py-0.5 bg-[#e6f4ea] text-[#137333] rounded-full text-[10px] font-bold border border-[#ceead6]">
+                            <span className="px-2.5 py-0.5 bg-[#e6f4ea] text-[#137333] rounded-full text-[10px] font-bold border border-[#ceead6] shadow-sm">
                               Completed
                             </span>
                           )}
                           {session.status === "Active" && (
-                            <span className="px-2.5 py-0.5 bg-[#fff3ed] text-[#d84315] rounded-full text-[10px] font-bold border border-orange-100">
+                            <span className="px-2.5 py-0.5 bg-[#fff3ed] text-[#d84315] rounded-full text-[10px] font-bold border border-orange-100 shadow-sm">
                               Active
                             </span>
                           )}
                           {session.status === "Upcoming" && (
                             <>
-                              <span className="px-2.5 py-0.5 bg-white text-stone-500 border border-stone-200 rounded-full text-[10px] font-semibold">
+                              <span className="px-2.5 py-0.5 bg-white text-stone-500 border border-stone-200 rounded-full text-[10px] font-semibold shadow-sm">
                                 Upcoming
                               </span>
                               <button
