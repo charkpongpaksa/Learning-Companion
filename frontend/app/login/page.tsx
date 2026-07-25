@@ -85,6 +85,7 @@ export default function LoginPage() {
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
               />
               <input
+              
                 id="email"
                 type="email"
                 placeholder="Enter your email"
