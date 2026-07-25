@@ -23,8 +23,8 @@ import TeacherSidebar from "@/components/teachersidebar";
 const QUESTION_FEED = [
   {
     id: 1,
-    studentName: "Somchai Jaidee",
-    initials: "SJ",
+    studentName: "Anonymous",
+    initials: "AN",
     timeAgo: "2 min ago",
     question:
       "What's the difference between a security group and a network ACL?",
@@ -32,16 +32,16 @@ const QUESTION_FEED = [
   },
   {
     id: 2,
-    studentName: "Pim Nakorn",
-    initials: "PN",
+    studentName: "Anonymous",
+    initials: "AN",
     timeAgo: "4 min ago",
     question: "Can one IAM role be attached to more than one EC2 instance?",
     tag: "IAM roles",
   },
   {
     id: 3,
-    studentName: "Kritsada Thongdee",
-    initials: "KT",
+    studentName: "Anonymous",
+    initials: "AN",
     timeAgo: "5 min ago",
     question:
       "My instance profile failed to assume the role — what did I miss?",
@@ -49,8 +49,8 @@ const QUESTION_FEED = [
   },
   {
     id: 4,
-    studentName: "Nina Suksawat",
-    initials: "NS",
+    studentName: "Anonymous",
+    initials: "AN",
     timeAgo: "7 min ago",
     question: "Is a security group stateful or stateless by default?",
     tag: "Security groups",
